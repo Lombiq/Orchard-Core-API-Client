@@ -1,0 +1,65 @@
+{
+  "name": "Lombiq.OrchardCoreApiClient.OpenId",
+  "displayName": "Lombiq OrchardCore Api Client - OpenId",
+  "description": "Setup the OpenId server and application",
+  "author": "Lombiq Technologies",
+  "website": "https://github.com/Lombiq/Orchard-Core-API-Client",
+  "version": "1.0",
+  "issetuprecipe": false,
+  "categories": [ "default" ],
+  "tags": [ "default" ],
+  "steps": [
+    {
+      "name": "feature",
+      "enable": [
+        "OrchardCore.OpenId",
+        "OrchardCore.OpenId.Management",
+        "OrchardCore.OpenId.Server",
+        "OrchardCore.OpenId.Validation"
+      ]
+    },
+    {
+      "name": "OpenIdServerSettings",
+      "TestingModeEnabled": false,
+      "AccessTokenFormat": "JsonWebToken",
+      "Authority": "",
+      "SigningCertificateStoreLocation": "",
+      "SigningCertificateStoreName": "",
+      "SigningCertificateThumbprint": "",
+      "EncryptionCertificateStoreLocation": "",
+      "EncryptionCertificateStoreName": "",
+      "EncryptionCertificateThumbprint": "",
+      "EnableTokenEndpoint": true,
+      "EnableAuthorizationEndpoint": false,
+      "EnableLogoutEndpoint": false,
+      "EnableUserInfoEndpoint": false,
+      "AllowPasswordFlow": false,
+      "AllowClientCredentialsFlow": true,
+      "AllowAuthorizationCodeFlow": false,
+      "AllowRefreshTokenFlow": false,
+      "AllowImplicitFlow": false
+    },
+    {
+      "name": "openidapplication",
+      "ClientId": "Console",
+      "DisplayName": "Console",
+      "Type": "Confidential",
+      "ClientSecret": "Password",
+      "EnableTokenEndpoint": true,
+      "EnableAuthorizationEndpoint": false,
+      "EnableLogoutEndpoint": false,
+      "EnableUserInfoEndpoint": false,
+      "AllowPasswordFlow": false,
+      "AllowClientCredentialsFlow": true,
+      "AllowAuthorizationCodeFlow": false,
+      "AllowRefreshTokenFlow": false,
+      "AllowImplicitFlow": false,
+      "RoleEntries": [
+        {
+          "Name": "Administrator",
+          "Selected": true
+        }
+      ]
+    }
+  ]
+}

@@ -15,7 +15,37 @@ public static class Program
         {
             ClientId = ClientId,
             ClientSecret = ClientSecret,
-            DefaultTenantUri = new Uri("https://localhost:44300"),
+            DefaultTenantUri = new Uri("https://localhost:44335"),
         });
+
+        await apiClient.CreateAndSetupTenantAsync(
+                new CreateApiViewModel
+                {
+                    Name = "Test",
+                    DatabaseProvider = "Sqlite",
+                    RequestUrlPrefix = "test",
+                    RequestUrlHost = string.Empty,
+                    ConnectionString = string.Empty,
+                    TablePrefix = "test",
+                    RecipeName = "",
+                },
+                new SetupApiViewModel
+                {
+                    Name = "Test",
+                    DatabaseProvider = "Sqlite",
+                    ConnectionString = string.Empty,
+                    RecipeName = "",
+                    UserName = "admin",
+                    Email = "admin@example.com",
+                    Password = "Password1!",
+                    SiteName = "Api Client Tenant Site",
+                    SiteTimeZone = "Europe/Budapest",
+                    TablePrefix = "test",
+                }
+            );
+
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+        Console.WriteLine("Creating the tenant succeeded.");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
     }
 }
