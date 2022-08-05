@@ -1,18 +1,14 @@
-# Lombiq <add project name here>
-
-
+# Lombiq OrchardCore API Client
 
 ## About
 
-Add a general overview of the project here. Keep or remove the OSOCE note below as necessary.
+This library contains an implementation for an API communicating with the tenants.
 
 Do you want to quickly try out this project and see it in action? Check it out in our [Open-Source Orchard Core Extensions](https://github.com/Lombiq/Open-Source-Orchard-Core-Extensions) full Orchard Core solution and also see our other useful Orchard Core-related open-source projects!
 
-
 ## Documentation
 
-Add detailed documentation here. If it's a lot of content then create documentation pages under the *Docs* folder and link pages here.
-
+For general details about and on using the API Client see the [root Readme](../Readme.md).
 
 ## Contributing and support
 

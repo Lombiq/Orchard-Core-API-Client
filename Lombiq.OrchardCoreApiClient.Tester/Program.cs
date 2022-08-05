@@ -21,31 +21,32 @@ public static class Program
         await apiClient.CreateAndSetupTenantAsync(
                 new CreateApiViewModel
                 {
-                    Name = "Test",
+                    Description = "Tenant created by API Client",
+                    Name = "ApiClientTenant",
                     DatabaseProvider = "Sqlite",
-                    RequestUrlPrefix = "test",
+                    RequestUrlPrefix = "apiClientTenant",
                     RequestUrlHost = string.Empty,
                     ConnectionString = string.Empty,
-                    TablePrefix = "test",
-                    RecipeName = "",
+                    TablePrefix = "apiClientTenant",
+                    RecipeName = "Blog",
                 },
                 new SetupApiViewModel
                 {
-                    Name = "Test",
+                    Name = "ApiClientTenant",
                     DatabaseProvider = "Sqlite",
                     ConnectionString = string.Empty,
-                    RecipeName = "",
+                    RecipeName = "Blog",
                     UserName = "admin",
                     Email = "admin@example.com",
                     Password = "Password1!",
                     SiteName = "Api Client Tenant Site",
                     SiteTimeZone = "Europe/Budapest",
-                    TablePrefix = "test",
+                    TablePrefix = "apiClientTenant",
                 }
             );
 
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
-        Console.WriteLine("Creating the tenant succeeded.");
+        Console.WriteLine("Creating and setting up the tenant succeeded.");
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
     }
 }
