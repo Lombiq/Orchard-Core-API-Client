@@ -9,7 +9,7 @@ Do you want to quickly try out this project and see it in action? Check it out i
 ## Documentation
 
 This project is about creating and setting up tenants through an API Client using [RestEase](https://github.com/canton7/RestEase).
-The project requires the OpenId features to be enabled and set up, for easy use, enable the deployment feature and import this [recipe](Lombiq.OrchardCoreApiClie/Recipes/Lombiq.OrchardCoreApiClient.OpenId.recipe.json) as a deployment package.
+The project requires the OpenId features to be enabled and set up, for easy use, enable the deployment feature and import this [recipe](Lombiq.OrchardCoreApiClient/Recipes/Lombiq.OrchardCoreApiClient.OpenId.recipe.json) as a deployment package.
 
 ## Recipes
 
