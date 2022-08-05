@@ -15,9 +15,9 @@ public class ApiClient
     private readonly ApiClientSettings _apiClientSettings;
     private readonly IOrchardCoreApi _orchardCoreApi;
 
-    public ApiClient(ApiClientSettings ApiClientSettings)
+    public ApiClient(ApiClientSettings apiClientSettings)
     {
-        _apiClientSettings = ApiClientSettings;
+        _apiClientSettings = apiClientSettings;
         _orchardCoreApi = GetOrchardCoreApi(_apiClientSettings.DefaultTenantUri);
     }
 
@@ -58,7 +58,7 @@ public class ApiClient
     }
 
     private IOrchardCoreApi GetOrchardCoreApi(Uri defaultTenantUri) =>
-        RestClient.For<IOrchardCoreApi>(defaultTenantUri, async (request, cancellationToken) =>
+        RestClient.For<IOrchardCoreApi>(defaultTenantUri, async (request, _) =>
         {
             if (request.Headers.Authorization != null)
             {

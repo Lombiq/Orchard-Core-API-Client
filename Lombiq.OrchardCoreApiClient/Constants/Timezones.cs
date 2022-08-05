@@ -4,7 +4,7 @@ namespace Lombiq.OrchardCoreApiClient.Constants;
 
 public static class Timezones
 {
-    public static List<string> GetTimezoneIds { get; } = new()
+    public static IList<string> GetTimezoneIds { get; } = new List<string>
     {
         "Pacific/Midway",
         "Pacific/Niue",
