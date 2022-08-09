@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <DefaultItemExcludes>$(DefaultItemExcludes);.git*</DefaultItemExcludes>
+  </PropertyGroup>
+  
+  <PropertyGroup>
     <Title>Lombiq API Client for Orchard Core</Title>
     <Authors>Lombiq Technologies</Authors>
     <Copyright>Copyright © 2022, Lombiq Technologies Ltd.</Copyright>
@@ -12,7 +16,7 @@
     <PackageProjectUrl>https://github.com/Lombiq/Orchard-Core-API-Client</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <None Include="License.md" Pack="true" PackagePath="" />
     <None Include="Readme.md" />

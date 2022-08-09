@@ -5,6 +5,7 @@ namespace Lombiq.OrchardCoreApiClient.Models;
 public class CreateApiViewModel
 {
     public string Description { get; set; }
+
     [Required]
     public string Name { get; set; }
     public string DatabaseProvider { get; set; }

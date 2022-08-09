@@ -81,6 +81,11 @@ public class ApiClient
                         tokenResponse.GetContent().Error);
                 }
 
+                if (tokenResponse.GetContent().ExpiresIn == "0")
+                {
+                    throw new ApiClientException($"The token is expired.");
+                }
+
                 request.Headers.Authorization = new AuthenticationHeaderValue(
                     request.Headers.Authorization.Scheme, tokenResponse.GetContent().AccessToken);
             }

@@ -12,4 +12,7 @@ public class Token
 
     [JsonProperty("error")]
     public string Error { get; set; }
+
+    [JsonProperty("expires_in")]
+    public string ExpiresIn { get; set; }
 }
