@@ -45,33 +45,6 @@ public static class Program
                 }
             );
 
-        await apiClient.CreateAndSetupTenantAsync(
-                new CreateApiViewModel
-                {
-                    Description = "Tenant created by API Client2",
-                    Name = "ApiClientTenant2",
-                    DatabaseProvider = "Sqlite",
-                    RequestUrlPrefix = "apiClientTenant2",
-                    RequestUrlHost = string.Empty,
-                    ConnectionString = string.Empty,
-                    TablePrefix = "apiClientTenant2",
-                    RecipeName = "Blog",
-                },
-                new SetupApiViewModel
-                {
-                    Name = "ApiClientTenant2",
-                    DatabaseProvider = "Sqlite",
-                    ConnectionString = string.Empty,
-                    RecipeName = "Blog",
-                    UserName = "admin",
-                    Email = "admin@example.com",
-                    Password = "Password1!",
-                    SiteName = "Api Client Tenant Site2",
-                    SiteTimeZone = "Europe/Budapest",
-                    TablePrefix = "apiClientTenant2",
-                }
-            );
-
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
         Console.WriteLine("Creating and setting up the tenants succeeded.");
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
