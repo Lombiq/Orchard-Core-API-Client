@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
-namespace Lombiq.OrchardCoreApiClient.Tester.Models;
+namespace Lombiq.OrchardCoreApiClient.Models;
 
 public class SetupApiViewModel
 {

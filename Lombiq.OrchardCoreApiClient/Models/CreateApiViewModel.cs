@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Lombiq.OrchardCoreApiClient.Tester.Models;
+namespace Lombiq.OrchardCoreApiClient.Models;
 
 public class CreateApiViewModel
 {
