@@ -1,4 +1,3 @@
-using Lombiq.OrchardCoreApiClient.Constants;
 using Lombiq.OrchardCoreApiClient.Exceptions;
 using Lombiq.OrchardCoreApiClient.Interfaces;
 using Lombiq.OrchardCoreApiClient.Models;
@@ -6,7 +5,6 @@ using RestEase;
 using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
 
 namespace Lombiq.OrchardCoreApiClient;
 
@@ -19,42 +17,6 @@ public class ApiClient
     {
         _apiClientSettings = apiClientSettings;
         _orchardCoreApi = GetOrchardCoreApi(_apiClientSettings.DefaultTenantUri);
-    }
-
-    public async Task CreateAndSetupTenantAsync(
-        CreateApiViewModel createApiViewModel,
-        SetupApiViewModel setupApiViewModel)
-    {
-        if (!Timezones.GetTimezoneIds.Contains(setupApiViewModel.SiteTimeZone))
-        {
-            throw new ApiClientException(
-                $"Invalid timezone ID {setupApiViewModel.SiteTimeZone}. For the list of all valid timezone IDs " +
-                "follow this list: https://gist.github.com/jrolstad/5ca7d78dbfe182d7c1be");
-        }
-
-        try
-        {
-            (await _orchardCoreApi.
-                CreateAsync(createApiViewModel).
-                ConfigureAwait(false)).
-                ResponseMessage.EnsureSuccessStatusCode();
-        }
-        catch (Exception ex)
-        {
-            throw new ApiClientException("Tenant creation failed.", ex);
-        }
-
-        try
-        {
-            (await _orchardCoreApi.
-                SetupAsync(setupApiViewModel).
-                ConfigureAwait(false)).
-                ResponseMessage.EnsureSuccessStatusCode();
-        }
-        catch (Exception ex)
-        {
-            throw new ApiClientException("Tenant setup failed.", ex);
-        }
     }
 
     private IOrchardCoreApi GetOrchardCoreApi(Uri defaultTenantUri) =>
