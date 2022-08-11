@@ -24,7 +24,7 @@ public static class Program
                     Description = "Tenant created by API Client",
                     Name = "ApiClientTenant",
                     DatabaseProvider = "Sqlite",
-                    RequestUrlPrefix = "apiClientTenant",
+                    RequestUrlPrefix = "api-client-tenant",
                     RequestUrlHost = string.Empty,
                     ConnectionString = string.Empty,
                     TablePrefix = "apiClientTenant",
