@@ -24,7 +24,7 @@ public interface IOrchardCoreApi
     /// Setup the previously created tenant in Orchard Core.
     /// </summary>
     /// <param name="setupTenantParameters">
-    /// The neccessary parameters to setup a tenant: Name, ConnectionString etc.
+    /// The necessary parameters to set up a tenant: Name, ConnectionString etc.
     /// </param>
     /// <returns>Returns the response of the tenant setup.</returns>
     [Post("api/tenants/setup")]
