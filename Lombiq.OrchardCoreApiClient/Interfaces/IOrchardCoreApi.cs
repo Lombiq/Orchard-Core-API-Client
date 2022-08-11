@@ -13,7 +13,7 @@ public interface IOrchardCoreApi
     /// Create a new tenant in Orchard Core.
     /// </summary>
     /// <param name="createTenantParameters">
-    /// The neccessary parameters to create a tenant: Name, RequestUrlPrefix etc.
+    /// The necessary parameters to create a tenant: Name, RequestUrlPrefix etc.
     /// </param>
     /// <returns>Returns the response of the tenant creation.</returns>
     [Post("api/tenants/create")]
