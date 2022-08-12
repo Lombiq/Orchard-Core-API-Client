@@ -59,7 +59,7 @@ public class ApiClient
         CreateApiViewModel createApiViewModel,
         SetupApiViewModel setupApiViewModel)
     {
-        if (!Timezones.GetTimezoneIds.Contains(setupApiViewModel.SiteTimeZone))
+        if (!Timezones.GetTimezoneIds().Contains(setupApiViewModel.SiteTimeZone))
         {
             throw new ApiClientException(
                 $"Invalid timezone ID {setupApiViewModel.SiteTimeZone}. For the list of all valid timezone IDs " +
