@@ -46,7 +46,7 @@ public class ApiClient
                             tokenResponse.GetContent().Error);
                     }
 
-                    int tokenExpiration = int.Parse(tokenResponse.GetContent().ExpiresIn, CultureInfo.CurrentCulture);
+                    int tokenExpiration = int.Parse(tokenResponse.GetContent().ExpiresIn, CultureInfo.InvariantCulture);
 
                     ExpirationDate = DateTime.UtcNow.AddSeconds(tokenExpiration);
 
