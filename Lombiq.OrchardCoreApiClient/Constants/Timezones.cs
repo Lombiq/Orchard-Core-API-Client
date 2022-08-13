@@ -13,7 +13,7 @@ public static class Timezones
         TzdbDateTimeZoneSource.Default
             .ZoneLocations
             .ToList()
-            .ForEach(tz => nodaTimezones.Add(tz.ZoneId));
+            .ForEach(timeZone => nodaTimezones.Add(timeZone.ZoneId));
 
         return nodaTimezones;
     }
