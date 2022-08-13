@@ -6,15 +6,10 @@ namespace Lombiq.OrchardCoreApiClient.Constants;
 
 public static class Timezones
 {
-    public static IList<string> GetTimezoneIds()
-    {
-        var nodaTimezones = new List<string>();
+    public static IList<string> TimezoneIds => GetTimeZoneIds();
 
-        TzdbDateTimeZoneSource.Default
-            .ZoneLocations
-            .ToList()
-            .ForEach(timeZone => nodaTimezones.Add(timeZone.ZoneId));
-
-        return nodaTimezones;
-    }
+    public static IList<string> GetTimeZoneIds() => TzdbDateTimeZoneSource.Default
+        .ZoneLocations
+        .Select(timeZone => timeZone.ZoneId)
+        .ToList();
 }

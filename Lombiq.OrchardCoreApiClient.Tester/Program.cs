@@ -46,7 +46,7 @@ public static class Program
             );
 
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
-        Console.WriteLine("Creating and setting up the tenants succeeded.");
+        Console.WriteLine("Creating and setting up the tenant succeeded.");
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
     }
 }

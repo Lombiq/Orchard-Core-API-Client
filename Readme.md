@@ -20,7 +20,7 @@ If you want to set up the OpenId features without the recipe, you need to enable
 
 1. On the Admin Dashboard open Security → OpenID Connect → Settings → Authorization server, and make sure that the "Enable Token Endpoint" and "Allow Client Credentials Flow" are enabled, and the Token Format should be JSON Web Token.
 2. Head over to Security → OpenID Connect → Settings → Token validation, and make sure the Authorization server tenant is set to Default.
-3. Last, but not least, go to Security → OpenID Connect → Management → Applications. Here you can add your applications and you may specify your Client Id and Client Secret. The application will use these parameters for authentication since the application uses Client Credentials Flow. The Allow Client Credentials Flow option should be enabled.
+3. Last, but not least, go to Security → OpenID Connect → Management → Applications. Here you can add your applications and you may specify your Client Id and Client Secret. The application will use these parameters for authentication since the application uses Client Credentials Flow. The Allow Client Credentials Flow option should be enabled, and under Client Credentials Roles, the Administrator role is required.
 
 For testing, run your Orchard Core app first, then `Lombiq.OrchardCoreApiClient.Tester`. You may need to edit the [_Program.cs_](Lombiq.OrchardCoreApiClient.Tester/Program.cs) according to your OpenID Application's settings (`ClientId`, `ClientSecret`, and `DefaultTenantUri`) and then run the console application.
 
