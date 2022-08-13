@@ -1,6 +1,6 @@
 {
   "name": "Lombiq.OrchardCoreApiClient.OpenId",
-  "displayName": "Lombiq OrchardCore Api Client - OpenId",
+  "displayName": "Lombiq API Client for Orchard Core - OpenId",
   "description": "Set up the OpenId server and application to allow access to the web APIs from the Lombiq API Client for Orchard Core.",
   "author": "Lombiq Technologies",
   "website": "https://github.com/Lombiq/Orchard-Core-API-Client",

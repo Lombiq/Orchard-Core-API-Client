@@ -29,14 +29,13 @@ public class ApiClient
                 if (ExpirationDate < DateTime.UtcNow.AddSeconds(300))
                 {
                     var tokenResponse = await RestClient.
-                    For<IOrchardCoreAuthorizatonApi>(defaultTenantUri).
-                    TokenAsync(
-                        new Dictionary<string, string>
-                        {
-                            ["grant_type"] = "client_credentials",
-                            ["client_id"] = _apiClientSettings.ClientId,
-                            ["client_secret"] = _apiClientSettings.ClientSecret,
-                        });
+                        For<IOrchardCoreAuthorizatonApi>(defaultTenantUri).TokenAsync(
+                            new Dictionary<string, string>
+                            {
+                                ["grant_type"] = "client_credentials",
+                                ["client_id"] = _apiClientSettings.ClientId,
+                                ["client_secret"] = _apiClientSettings.ClientSecret,
+                            });
 
                     tokenResponse.ResponseMessage.EnsureSuccessStatusCode();
 

@@ -1,4 +1,4 @@
-# Lombiq OrchardCore API Client
+# Lombiq API Client for Orchard Core
 
 ## About
 
