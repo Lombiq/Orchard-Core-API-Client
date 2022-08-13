@@ -5,6 +5,7 @@ using Lombiq.OrchardCoreApiClient.Models;
 using RestEase;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
@@ -13,45 +14,48 @@ namespace Lombiq.OrchardCoreApiClient;
 public class ApiClient
 {
     private readonly ApiClientSettings _apiClientSettings;
-    private readonly IOrchardCoreApi _orchardCoreApi;
+    private Lazy<IOrchardCoreApi> LazyOrchardCoreApi => new(() => GetOrchardCoreApi(_apiClientSettings.DefaultTenantUri));
+    public IOrchardCoreApi OrchardCoreApi => LazyOrchardCoreApi.Value;
+    private DateTime ExpirationDate = DateTime.MinValue;
+    private Token TokenResponse;
 
-    public ApiClient(ApiClientSettings apiClientSettings)
-    {
-        _apiClientSettings = apiClientSettings;
-        _orchardCoreApi = GetOrchardCoreApi(_apiClientSettings.DefaultTenantUri);
-    }
+    public ApiClient(ApiClientSettings apiClientSettings) => _apiClientSettings = apiClientSettings;
 
     private IOrchardCoreApi GetOrchardCoreApi(Uri defaultTenantUri) =>
         RestClient.For<IOrchardCoreApi>(defaultTenantUri, async (request, _) =>
         {
             if (request.Headers.Authorization != null)
             {
-                var tokenResponse = await RestClient.
-                For<IOrchardCoreAuthorizatonApi>(defaultTenantUri).
-                TokenAsync(
-                    new Dictionary<string, string>
+                if (ExpirationDate < DateTime.UtcNow.AddSeconds(300))
+                {
+                    var tokenResponse = await RestClient.
+                    For<IOrchardCoreAuthorizatonApi>(defaultTenantUri).
+                    TokenAsync(
+                        new Dictionary<string, string>
+                        {
+                            ["grant_type"] = "client_credentials",
+                            ["client_id"] = _apiClientSettings.ClientId,
+                            ["client_secret"] = _apiClientSettings.ClientSecret,
+                        });
+
+                    tokenResponse.ResponseMessage.EnsureSuccessStatusCode();
+
+                    if (tokenResponse.GetContent().Error != null)
                     {
-                        ["grant_type"] = "client_credentials",
-                        ["client_id"] = _apiClientSettings.ClientId,
-                        ["client_secret"] = _apiClientSettings.ClientSecret,
-                    });
+                        throw new ApiClientException(
+                            $"API client setup failed. An error occurred while retrieving an access token: " +
+                            tokenResponse.GetContent().Error);
+                    }
 
-                tokenResponse.ResponseMessage.EnsureSuccessStatusCode();
+                    int tokenExpiration = int.Parse(tokenResponse.GetContent().ExpiresIn, CultureInfo.CurrentCulture);
 
-                if (tokenResponse.GetContent().Error != null)
-                {
-                    throw new ApiClientException(
-                        $"API client setup failed. An error occurred while retrieving an access token: " +
-                        tokenResponse.GetContent().Error);
-                }
+                    ExpirationDate = DateTime.UtcNow.AddSeconds(tokenExpiration);
 
-                if (tokenResponse.GetContent().ExpiresIn == "0")
-                {
-                    throw new ApiClientException($"The token is expired.");
+                    TokenResponse = tokenResponse.GetContent();
                 }
 
                 request.Headers.Authorization = new AuthenticationHeaderValue(
-                    request.Headers.Authorization.Scheme, tokenResponse.GetContent().AccessToken);
+                    request.Headers.Authorization.Scheme, TokenResponse.AccessToken);
             }
         });
 
@@ -68,7 +72,7 @@ public class ApiClient
 
         try
         {
-            (await _orchardCoreApi.
+            (await OrchardCoreApi.
                 CreateAsync(createApiViewModel).
                 ConfigureAwait(false)).
                 ResponseMessage.EnsureSuccessStatusCode();
@@ -80,7 +84,7 @@ public class ApiClient
 
         try
         {
-            (await _orchardCoreApi.
+            (await OrchardCoreApi.
                 SetupAsync(setupApiViewModel).
                 ConfigureAwait(false)).
                 ResponseMessage.EnsureSuccessStatusCode();

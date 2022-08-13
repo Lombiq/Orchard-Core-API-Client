@@ -6,7 +6,6 @@ namespace Lombiq.OrchardCoreApiClient.Constants;
 
 public static class Timezones
 {
-
     public static IList<string> GetTimezoneIds()
     {
         var nodaTimezones = new List<string>();
