@@ -15,7 +15,8 @@
         "OrchardCore.OpenId",
         "OrchardCore.OpenId.Management",
         "OrchardCore.OpenId.Server",
-        "OrchardCore.OpenId.Validation"
+        "OrchardCore.OpenId.Validation",
+        "OrchardCore.Tenants"
       ]
     },
     {

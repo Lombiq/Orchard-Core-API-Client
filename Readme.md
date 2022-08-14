@@ -26,7 +26,7 @@ For testing, run your Orchard Core app first, then `Lombiq.OrchardCoreApiClient.
 
 ## Recipes
 
-Lombiq OrchardCore API Client OpenId - Recipe for enabling OpenId features and setting it up for the console tester app. To use this recipe, enable the Deployment feature and import this as a deployment package.
+Lombiq OrchardCore API Client OpenId - Recipe for enabling the Tenants and OpenId features and setting it up for the console tester application. To use this recipe, enable the Deployment feature and import this as a deployment package.
 
 ## Contributing and support
 
