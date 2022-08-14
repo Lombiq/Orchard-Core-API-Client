@@ -15,7 +15,7 @@ public class ApiClient
 {
     private readonly ApiClientSettings _apiClientSettings;
     private Lazy<IOrchardCoreApi> LazyOrchardCoreApi => new(() => GetOrchardCoreApi(_apiClientSettings.DefaultTenantUri));
-    private DateTime _expirationDateUTC = DateTime.MinValue;
+    private DateTime _expirationDateUtc = DateTime.MinValue;
     private Token _tokenResponse;
     public IOrchardCoreApi OrchardCoreApi => LazyOrchardCoreApi.Value;
 
