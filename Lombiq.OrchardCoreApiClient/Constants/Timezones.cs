@@ -6,8 +6,8 @@ namespace Lombiq.OrchardCoreApiClient.Constants;
 
 public static class Timezones
 {
-    private static IList<string> _timezoneId;
-    public static IList<string> TimezoneIds => _timezoneId ??= GetTimeZoneIds();
+    private static IList<string> _timezoneIds;
+    public static IList<string> TimezoneIds => _timezoneIds ??= GetTimeZoneIds();
 
     public static IList<string> GetTimeZoneIds() => TzdbDateTimeZoneSource.Default
         .ZoneLocations
