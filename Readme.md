@@ -1,5 +1,7 @@
 # Lombiq API Client for Orchard Core
 
+[![Lombiq.OrchardCoreApiClient NuGet](https://img.shields.io/nuget/v/Lombiq.OrchardCoreApiClient?label=Lombiq.OrchardCoreApiClient)](https://www.nuget.org/packages/Lombiq.OrchardCoreApiClient)
+
 ## About
 
 A client library for communicating with the [Orchard Core](https://www.orchardcore.net/) web APIs. Currently, it contains an implementation for the tenant management API and a console application for testing and demonstration.
