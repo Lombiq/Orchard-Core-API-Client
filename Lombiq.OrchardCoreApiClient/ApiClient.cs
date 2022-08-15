@@ -29,7 +29,7 @@ public class ApiClient
                 throw new ApiClientException("The request header should contain an authorization token.");
             }
 
-            if (_expirationDateUTC < DateTime.UtcNow.AddSeconds(60))
+            if (_expirationDateUtc < DateTime.UtcNow.AddSeconds(60))
             {
                 var tokenResponse = await RestClient
                     .For<IOrchardCoreAuthorizatonApi>(defaultTenantUri)
@@ -52,7 +52,7 @@ public class ApiClient
 
                 int tokenExpiration = int.Parse(tokenResponse.GetContent().ExpiresIn, CultureInfo.InvariantCulture);
 
-                _expirationDateUTC = DateTime.UtcNow.AddSeconds(tokenExpiration);
+                _expirationDateUtc = DateTime.UtcNow.AddSeconds(tokenExpiration);
 
                 _tokenResponse = tokenResponse.GetContent();
             }
