@@ -28,7 +28,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="RestEase" Version="1.5.7" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
-    <PackageReference Include="NodaTime" Version="3.1.2" />
+    <PackageReference Include="NodaTime" Version="3.1.4" />
   </ItemGroup>
 
 </Project>
