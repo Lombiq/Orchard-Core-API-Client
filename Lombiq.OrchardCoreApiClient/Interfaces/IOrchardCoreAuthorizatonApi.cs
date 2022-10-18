@@ -8,7 +8,7 @@ namespace Lombiq.OrchardCoreApiClient.Interfaces;
 /// <summary>
 /// Interface representing the OpenID APIs of Orchard Core.
 /// </summary>
-public interface IOrchardCoreAuthorizatonApi
+public interface IOrchardCoreAuthorizationApi
 {
     /// <summary>
     /// Makes a request to the token endpoint of the Authorization server.
