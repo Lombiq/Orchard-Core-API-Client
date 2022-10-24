@@ -32,7 +32,7 @@ public class ApiClient
             if (_expirationDateUtc < DateTime.UtcNow.AddSeconds(60))
             {
                 var tokenResponse = await RestClient
-                    .For<IOrchardCoreAuthorizatonApi>(defaultTenantUri)
+                    .For<IOrchardCoreAuthorizationApi>(defaultTenantUri)
                     .TokenAsync(
                         new Dictionary<string, string>
                         {
