@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <DefaultItemExcludes>$(DefaultItemExcludes);.git*</DefaultItemExcludes>
-    <LangVersion>10.0</LangVersion>
   </PropertyGroup>
   
   <PropertyGroup>
