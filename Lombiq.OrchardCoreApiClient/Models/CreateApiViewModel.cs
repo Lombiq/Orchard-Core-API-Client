@@ -14,4 +14,5 @@ public class CreateApiViewModel
     public string ConnectionString { get; set; }
     public string TablePrefix { get; set; }
     public string RecipeName { get; set; }
+    public string FeatureProfile { get; set; }
 }
