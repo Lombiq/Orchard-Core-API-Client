@@ -29,6 +29,7 @@ public static class Program
                     ConnectionString = string.Empty,
                     TablePrefix = "apiClientTenant",
                     RecipeName = "Blog",
+                    Category = "API Client Tenants",
                 },
                 new SetupApiViewModel
                 {

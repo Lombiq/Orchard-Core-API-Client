@@ -1,8 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace Lombiq.OrchardCoreApiClient.Models;
-
-public class CreateApiViewModel
+public class EditApiViewModel
 {
     public string Description { get; set; }
 
