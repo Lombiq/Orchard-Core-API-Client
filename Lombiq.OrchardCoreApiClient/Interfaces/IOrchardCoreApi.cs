@@ -34,9 +34,7 @@ public interface IOrchardCoreApi
     /// <summary>
     /// Edit a previously created tenant in Orchard Core.
     /// </summary>
-    /// <param name="editTenantParameters">
-    /// The necessary parameter to edit a tenant: Name.
-    /// </param>
+    /// <param name="editTenantParameters">The necessary parameter to edit a tenant: Name.</param>
     /// <returns>The response of the tenant edit.</returns>
     [Post("api/tenants/edit")]
     [Header("Authorization", "Bearer")]
