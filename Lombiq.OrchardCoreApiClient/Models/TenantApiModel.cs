@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace Lombiq.OrchardCoreApiClient.Models;
+
 public class TenantApiModel
 {
     public string Description { get; set; }
