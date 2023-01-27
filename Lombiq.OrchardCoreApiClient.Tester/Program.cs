@@ -1,5 +1,6 @@
 using Lombiq.OrchardCoreApiClient.Models;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace Lombiq.OrchardCoreApiClient.Tester;
@@ -9,6 +10,10 @@ public static class Program
     private const string ClientId = "Console";
     private const string ClientSecret = "Password";
 
+    [SuppressMessage(
+        "Design",
+        "CA1303:Do not pass literals as localized parameters",
+        Justification = "It is not a localization issue")]
     public static async Task Main()
     {
         var apiClient = new ApiClient(new ApiClientSettings
@@ -46,9 +51,7 @@ public static class Program
                 }
             );
 
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
         Console.WriteLine("Creating and setting up the tenant succeeded.");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
 
         var editModel = new TenantApiModel
         {
@@ -61,8 +64,6 @@ public static class Program
 
         await apiClient.OrchardCoreApi.EditAsync(editModel);
 
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
         Console.WriteLine("Editing the tenant succeeded.");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
     }
 }
