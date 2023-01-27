@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Lombiq.OrchardCoreApiClient.Models;
 
-public class SetupApiViewModel
+public class TenantSetupApiModel
 {
     [Required]
     public string Name { get; set; }

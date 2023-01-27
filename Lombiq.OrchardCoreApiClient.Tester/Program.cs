@@ -19,7 +19,7 @@ public static class Program
         });
 
         await apiClient.CreateAndSetupTenantAsync(
-                new CreateApiViewModel
+                new TenantApiModel
                 {
                     Description = "Tenant created by API Client",
                     Name = "ApiClientTenant",
@@ -31,7 +31,7 @@ public static class Program
                     RecipeName = "Blog",
                     Category = "API Client Tenants",
                 },
-                new SetupApiViewModel
+                new TenantSetupApiModel
                 {
                     Name = "ApiClientTenant",
                     DatabaseProvider = "Sqlite",
@@ -48,6 +48,21 @@ public static class Program
 
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
         Console.WriteLine("Creating and setting up the tenant succeeded.");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
+
+        var editModel = new TenantApiModel
+        {
+            Description = "Tenant edited by API Client",
+            Name = "ApiClientTenant",
+            RequestUrlPrefix = "api-client-tenant-edited",
+            RequestUrlHost = "https://orcharddojo.net/",
+            Category = "API Client - Edited Tenants",
+        };
+
+        await apiClient.OrchardCoreApi.EditAsync(editModel);
+
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+        Console.WriteLine("Editing the tenant succeeded.");
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
     }
 }
