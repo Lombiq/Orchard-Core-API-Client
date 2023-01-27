@@ -1,5 +1,6 @@
 using Lombiq.OrchardCoreApiClient.Models;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace Lombiq.OrchardCoreApiClient.Tester;
@@ -9,6 +10,10 @@ public static class Program
     private const string ClientId = "Console";
     private const string ClientSecret = "Password";
 
+    [SuppressMessage(
+        "Design",
+        "CA1303:Do not pass literals as localized parameters",
+        Justification = "It is not a localization issue")]
     public static async Task Main()
     {
         var apiClient = new ApiClient(new ApiClientSettings
@@ -19,7 +24,7 @@ public static class Program
         });
 
         await apiClient.CreateAndSetupTenantAsync(
-                new CreateApiViewModel
+                new TenantApiModel
                 {
                     Description = "Tenant created by API Client",
                     Name = "ApiClientTenant",
@@ -29,8 +34,9 @@ public static class Program
                     ConnectionString = string.Empty,
                     TablePrefix = "apiClientTenant",
                     RecipeName = "Blog",
+                    Category = "API Client Tenants",
                 },
-                new SetupApiViewModel
+                new TenantSetupApiModel
                 {
                     Name = "ApiClientTenant",
                     DatabaseProvider = "Sqlite",
@@ -45,8 +51,19 @@ public static class Program
                 }
             );
 
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
         Console.WriteLine("Creating and setting up the tenant succeeded.");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
+
+        var editModel = new TenantApiModel
+        {
+            Description = "Tenant edited by API Client",
+            Name = "ApiClientTenant",
+            RequestUrlPrefix = "api-client-tenant-edited",
+            RequestUrlHost = "https://orcharddojo.net/",
+            Category = "API Client - Edited Tenants",
+        };
+
+        await apiClient.OrchardCoreApi.EditAsync(editModel);
+
+        Console.WriteLine("Editing the tenant succeeded.");
     }
 }
