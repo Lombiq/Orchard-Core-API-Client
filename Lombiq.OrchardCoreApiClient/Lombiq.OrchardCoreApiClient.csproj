@@ -22,7 +22,7 @@
     <None Include="Readme.md" />
     <None Include="NuGetIcon.png" Pack="true" PackagePath="" />
   </ItemGroup>
-	
+    
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="6.0.0-preview.4.21253.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
