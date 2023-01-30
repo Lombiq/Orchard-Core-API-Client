@@ -6,6 +6,7 @@ using RestEase;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
@@ -13,13 +14,18 @@ namespace Lombiq.OrchardCoreApiClient;
 
 public class ApiClient
 {
-    private readonly ApiClientSettings _apiClientSettings;
     private Lazy<IOrchardCoreApi> LazyOrchardCoreApi => new(() => GetOrchardCoreApi(_apiClientSettings.DefaultTenantUri));
-    private DateTime _expirationDateUtc = DateTime.MinValue;
-    private Token _tokenResponse;
+    protected readonly ApiClientSettings _apiClientSettings;
+    protected readonly HttpClient _httpClient;
+    protected DateTime _expirationDateUtc = DateTime.MinValue;
+    protected Token _tokenResponse;
     public IOrchardCoreApi OrchardCoreApi => LazyOrchardCoreApi.Value;
 
-    public ApiClient(ApiClientSettings apiClientSettings) => _apiClientSettings = apiClientSettings;
+    public ApiClient(ApiClientSettings apiClientSettings, HttpClient httpClient = null)
+    {
+        _apiClientSettings = apiClientSettings;
+        _httpClient = httpClient ?? new HttpClient();
+    }
 
     private IOrchardCoreApi GetOrchardCoreApi(Uri defaultTenantUri) =>
         RestClient.For<IOrchardCoreApi>(defaultTenantUri, async (request, _) =>
