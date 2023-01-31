@@ -23,10 +23,12 @@ public class ApiClient : IDisposable
         _apiClientSettings = apiClientSettings;
 
         _certificateValidatingHandler = new ConfigurableCertificateValidatingHttpClientHandler(_apiClientSettings);
+#pragma warning disable CA5399 // HttpClient is created without enabling CheckCertificateRevocationList
         _httpClient = new HttpClient(_certificateValidatingHandler)
         {
             BaseAddress = _apiClientSettings.DefaultTenantUri,
         };
+#pragma warning restore CA5399
     }
 
     public async Task CreateAndSetupTenantAsync(
