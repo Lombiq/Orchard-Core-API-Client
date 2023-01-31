@@ -62,8 +62,8 @@ public class ApiClient
         });
 
     public async Task CreateAndSetupTenantAsync(
-        CreateApiViewModel createApiViewModel,
-        SetupApiViewModel setupApiViewModel)
+        TenantApiModel createApiViewModel,
+        TenantSetupApiModel setupApiViewModel)
     {
         if (!Timezones.TimezoneIds.Contains(setupApiViewModel.SiteTimeZone))
         {
