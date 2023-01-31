@@ -9,11 +9,12 @@ using System.Threading.Tasks;
 
 namespace Lombiq.OrchardCoreApiClient;
 
-public class ApiClient
+public class ApiClient : IDisposable
 {
-    private Lazy<IOrchardCoreApi> LazyOrchardCoreApi => new(() => RestClient.For<IOrchardCoreApi>(_httpClient));
     protected readonly ApiClientSettings _apiClientSettings;
-    protected readonly HttpClient _httpClient;
+    private Lazy<IOrchardCoreApi> LazyOrchardCoreApi => new(() => RestClient.For<IOrchardCoreApi>(_httpClient));
+    private ConfigurablyCertificateValidatingHttpClientHandler _certificateValidatingHandler;
+    protected HttpClient _httpClient;
 
     public IOrchardCoreApi OrchardCoreApi => LazyOrchardCoreApi.Value;
 
@@ -21,8 +22,8 @@ public class ApiClient
     {
         _apiClientSettings = apiClientSettings;
 
-        // This needs to use the factory.
-        _httpClient = new HttpClient(new ConfigurablyCertificateValidatingHttpClientHandler(_apiClientSettings))
+        _certificateValidatingHandler = new ConfigurablyCertificateValidatingHttpClientHandler(_apiClientSettings);
+        _httpClient = new HttpClient(_certificateValidatingHandler)
         {
             BaseAddress = _apiClientSettings.DefaultTenantUri,
         };
@@ -61,6 +62,27 @@ public class ApiClient
         catch (Exception ex)
         {
             throw new ApiClientException("Tenant setup failed.", ex);
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_httpClient != null)
+        {
+            _httpClient.Dispose();
+            _httpClient = null;
+        }
+
+        if (_certificateValidatingHandler != null)
+        {
+            _certificateValidatingHandler.Dispose();
+            _certificateValidatingHandler = null;
         }
     }
 }

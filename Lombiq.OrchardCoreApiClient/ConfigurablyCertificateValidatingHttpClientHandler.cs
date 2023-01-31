@@ -23,15 +23,21 @@ internal class ConfigurablyCertificateValidatingHttpClientHandler : HttpClientHa
     {
         _apiClientSettings = apiClientSettings;
 
-        // Conditionally disable certificate validation, based on ApiClientSettings.
-        ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
+        if (_apiClientSettings.DisableCertificateValidation)
+        {
+#pragma warning disable S4830
+#pragma warning disable SCS0004 // Certificate validation has been disabled
+            ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
+#pragma warning restore SCS0004
+#pragma warning restore S4830 // Enable server certificate validation
+        }
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         if (request.Headers.Authorization == null)
         {
-            throw new ApiClientException("The request header should contain an authorization token.");
+            throw new ApiClientException($"The {nameof(request)} header should contain an authorization token.");
         }
 
         if (_expirationDateUtc < DateTime.UtcNow.AddSeconds(60))
