@@ -28,7 +28,6 @@ internal class ConfigurableCertificateValidatingHttpClientHandler : HttpClientHa
 #pragma warning disable S4830 // Enable server certificate validation
 #pragma warning disable SCS0004 // Certificate validation has been disabled
             ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
-            CheckCertificateRevocationList = true;
 #pragma warning restore SCS0004
 #pragma warning restore S4830
         }
