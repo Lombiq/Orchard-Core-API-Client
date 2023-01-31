@@ -13,7 +13,7 @@ public class ApiClient : IDisposable
 {
     protected readonly ApiClientSettings _apiClientSettings;
     private Lazy<IOrchardCoreApi> LazyOrchardCoreApi => new(() => RestClient.For<IOrchardCoreApi>(_httpClient));
-    private ConfigurablyCertificateValidatingHttpClientHandler _certificateValidatingHandler;
+    private ConfigurableCertificateValidatingHttpClientHandler _certificateValidatingHandler;
     protected HttpClient _httpClient;
 
     public IOrchardCoreApi OrchardCoreApi => LazyOrchardCoreApi.Value;
@@ -22,7 +22,7 @@ public class ApiClient : IDisposable
     {
         _apiClientSettings = apiClientSettings;
 
-        _certificateValidatingHandler = new ConfigurablyCertificateValidatingHttpClientHandler(_apiClientSettings);
+        _certificateValidatingHandler = new ConfigurableCertificateValidatingHttpClientHandler(_apiClientSettings);
         _httpClient = new HttpClient(_certificateValidatingHandler)
         {
             BaseAddress = _apiClientSettings.DefaultTenantUri,

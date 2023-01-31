@@ -12,14 +12,14 @@ using System.Threading.Tasks;
 
 namespace Lombiq.OrchardCoreApiClient;
 
-internal class ConfigurablyCertificateValidatingHttpClientHandler : HttpClientHandler
+internal class ConfigurableCertificateValidatingHttpClientHandler : HttpClientHandler
 {
     private readonly ApiClientSettings _apiClientSettings;
 
     private DateTime _expirationDateUtc = DateTime.MinValue;
     private Token _tokenResponse;
 
-    public ConfigurablyCertificateValidatingHttpClientHandler(ApiClientSettings apiClientSettings)
+    public ConfigurableCertificateValidatingHttpClientHandler(ApiClientSettings apiClientSettings)
     {
         _apiClientSettings = apiClientSettings;
 
