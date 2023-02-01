@@ -52,12 +52,15 @@ internal class ConfigurableCertificateValidatingHttpClientHandler : HttpClientHa
             if (_apiClientSettings.DisableCertificateValidation)
             {
                 ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
+                CheckCertificateRevocationList = true;
             }
 
+#pragma warning disable CA5399 // HttpClient is created without enabling CheckCertificateRevocationList
             var httpClient = new HttpClient(handler)
             {
                 BaseAddress = _apiClientSettings.DefaultTenantUri,
             };
+#pragma warning restore CA5399
 
             var tokenResponse = await RestClient
                 .For<IOrchardCoreAuthorizationApi>(httpClient)
