@@ -4,6 +4,7 @@ using Lombiq.OrchardCoreApiClient.Models;
 using RestEase;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -12,6 +13,14 @@ using System.Threading.Tasks;
 
 namespace Lombiq.OrchardCoreApiClient;
 
+[SuppressMessage(
+        "Security",
+        "SCS0004: Certificate Validation has been disabled.",
+        Justification = "It is only disabled for local testing")]
+[SuppressMessage(
+        "Security",
+        "S4830: Enable server certificate validation on this SSL/TLS connection",
+        Justification = "It is only disabled for local testing")]
 internal class ConfigurableCertificateValidatingHttpClientHandler : HttpClientHandler
 {
     private readonly ApiClientSettings _apiClientSettings;
@@ -25,11 +34,7 @@ internal class ConfigurableCertificateValidatingHttpClientHandler : HttpClientHa
 
         if (_apiClientSettings.DisableCertificateValidation)
         {
-#pragma warning disable S4830 // Enable server certificate validation
-#pragma warning disable SCS0004 // Certificate validation has been disabled
             ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
-#pragma warning restore SCS0004
-#pragma warning restore S4830
         }
     }
 
@@ -42,8 +47,20 @@ internal class ConfigurableCertificateValidatingHttpClientHandler : HttpClientHa
 
         if (_expirationDateUtc < DateTime.UtcNow.AddSeconds(60))
         {
+            var handler = new HttpClientHandler();
+
+            if (_apiClientSettings.DisableCertificateValidation)
+            {
+                ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
+            }
+
+            var httpClient = new HttpClient(handler)
+            {
+                BaseAddress = _apiClientSettings.DefaultTenantUri,
+            };
+
             var tokenResponse = await RestClient
-                .For<IOrchardCoreAuthorizationApi>(_apiClientSettings.DefaultTenantUri)
+                .For<IOrchardCoreAuthorizationApi>(httpClient)
                 .TokenAsync(
                     new Dictionary<string, string>
                     {
@@ -66,6 +83,9 @@ internal class ConfigurableCertificateValidatingHttpClientHandler : HttpClientHa
             _expirationDateUtc = DateTime.UtcNow.AddSeconds(tokenExpiration);
 
             _tokenResponse = tokenResponse.GetContent();
+
+            handler.Dispose();
+            httpClient.Dispose();
         }
 
         request.Headers.Authorization = new AuthenticationHeaderValue(
