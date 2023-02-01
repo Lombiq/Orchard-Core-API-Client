@@ -51,8 +51,7 @@ internal class ConfigurableCertificateValidatingHttpClientHandler : HttpClientHa
 
             if (_apiClientSettings.DisableCertificateValidation)
             {
-                ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
-                CheckCertificateRevocationList = true;
+                handler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
             }
 
 #pragma warning disable CA5399 // HttpClient is created without enabling CheckCertificateRevocationList
