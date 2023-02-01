@@ -47,7 +47,7 @@ internal class ConfigurableCertificateValidatingHttpClientHandler : HttpClientHa
 
         if (_expirationDateUtc < DateTime.UtcNow.AddSeconds(60))
         {
-            var handler = new HttpClientHandler();
+            using var handler = new HttpClientHandler();
 
             if (_apiClientSettings.DisableCertificateValidation)
             {
@@ -56,12 +56,10 @@ internal class ConfigurableCertificateValidatingHttpClientHandler : HttpClientHa
             }
 
 #pragma warning disable CA5400 // Ensure HttpClient certificate revocation list check is not disabled
-#pragma warning disable CA5399 // Enable HttpClient certificate revocation list check
-            var httpClient = new HttpClient(handler)
+            using var httpClient = new HttpClient(handler)
             {
                 BaseAddress = _apiClientSettings.DefaultTenantUri,
             };
-#pragma warning restore CA5399
 #pragma warning restore CA5400
 
             var tokenResponse = await RestClient
@@ -88,9 +86,6 @@ internal class ConfigurableCertificateValidatingHttpClientHandler : HttpClientHa
             _expirationDateUtc = DateTime.UtcNow.AddSeconds(tokenExpiration);
 
             _tokenResponse = tokenResponse.GetContent();
-
-            handler.Dispose();
-            httpClient.Dispose();
         }
 
         request.Headers.Authorization = new AuthenticationHeaderValue(
