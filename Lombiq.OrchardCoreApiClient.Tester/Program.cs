@@ -16,7 +16,7 @@ public static class Program
         Justification = "It is not a localization issue")]
     public static async Task Main()
     {
-        var apiClient = new ApiClient(new ApiClientSettings
+        using var apiClient = new ApiClient(new ApiClientSettings
         {
             ClientId = ClientId,
             ClientSecret = ClientSecret,
