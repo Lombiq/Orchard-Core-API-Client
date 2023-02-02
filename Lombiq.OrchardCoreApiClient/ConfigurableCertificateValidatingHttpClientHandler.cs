@@ -16,11 +16,11 @@ namespace Lombiq.OrchardCoreApiClient;
 [SuppressMessage(
         "Security",
         "SCS0004: Certificate Validation has been disabled.",
-        Justification = "It is only disabled for local testing")]
+        Justification = "It's only disabled optionally, like for local testing")]
 [SuppressMessage(
         "Security",
         "S4830: Enable server certificate validation on this SSL/TLS connection",
-        Justification = "It is only disabled for local testing")]
+        Justification = "It's only disabled optionally, like for local testing.")]
 internal class ConfigurableCertificateValidatingHttpClientHandler : HttpClientHandler
 {
     private readonly ApiClientSettings _apiClientSettings;
