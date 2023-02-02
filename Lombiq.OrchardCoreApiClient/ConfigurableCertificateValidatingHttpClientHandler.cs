@@ -55,6 +55,7 @@ internal class ConfigurableCertificateValidatingHttpClientHandler : HttpClientHa
                 handler.CheckCertificateRevocationList = true;
             }
 
+            // It's only disabled optionally, like for local testing.
 #pragma warning disable CA5400 // Ensure HttpClient certificate revocation list check is not disabled
             using var httpClient = new HttpClient(handler)
             {

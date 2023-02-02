@@ -11,22 +11,21 @@ namespace Lombiq.OrchardCoreApiClient;
 
 public class ApiClient : IDisposable
 {
-    protected readonly ApiClientSettings _apiClientSettings;
     private Lazy<IOrchardCoreApi> LazyOrchardCoreApi => new(() => RestClient.For<IOrchardCoreApi>(_httpClient));
     private ConfigurableCertificateValidatingHttpClientHandler _certificateValidatingHandler;
-    protected HttpClient _httpClient;
+    private HttpClient _httpClient;
 
     public IOrchardCoreApi OrchardCoreApi => LazyOrchardCoreApi.Value;
 
     public ApiClient(ApiClientSettings apiClientSettings)
     {
-        _apiClientSettings = apiClientSettings;
+        _certificateValidatingHandler = new ConfigurableCertificateValidatingHttpClientHandler(apiClientSettings);
 
-        _certificateValidatingHandler = new ConfigurableCertificateValidatingHttpClientHandler(_apiClientSettings);
+        // It's only disabled optionally, like for local testing.
 #pragma warning disable CA5399 // HttpClient is created without enabling CheckCertificateRevocationList
         _httpClient = new HttpClient(_certificateValidatingHandler)
         {
-            BaseAddress = _apiClientSettings.DefaultTenantUri,
+            BaseAddress = apiClientSettings.DefaultTenantUri,
         };
 #pragma warning restore CA5399
     }
