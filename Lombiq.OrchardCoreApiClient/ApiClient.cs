@@ -4,62 +4,31 @@ using Lombiq.OrchardCoreApiClient.Interfaces;
 using Lombiq.OrchardCoreApiClient.Models;
 using RestEase;
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Net.Http.Headers;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Lombiq.OrchardCoreApiClient;
 
-public class ApiClient
+public class ApiClient : IDisposable
 {
-    private readonly ApiClientSettings _apiClientSettings;
-    private Lazy<IOrchardCoreApi> LazyOrchardCoreApi => new(() => GetOrchardCoreApi(_apiClientSettings.DefaultTenantUri));
-    private DateTime _expirationDateUtc = DateTime.MinValue;
-    private Token _tokenResponse;
+    private Lazy<IOrchardCoreApi> LazyOrchardCoreApi => new(() => RestClient.For<IOrchardCoreApi>(_httpClient));
+    private ConfigurableCertificateValidatingHttpClientHandler _certificateValidatingHandler;
+    private HttpClient _httpClient;
+
     public IOrchardCoreApi OrchardCoreApi => LazyOrchardCoreApi.Value;
 
-    public ApiClient(ApiClientSettings apiClientSettings) => _apiClientSettings = apiClientSettings;
+    public ApiClient(ApiClientSettings apiClientSettings)
+    {
+        _certificateValidatingHandler = new ConfigurableCertificateValidatingHttpClientHandler(apiClientSettings);
 
-    private IOrchardCoreApi GetOrchardCoreApi(Uri defaultTenantUri) =>
-        RestClient.For<IOrchardCoreApi>(defaultTenantUri, async (request, _) =>
+        // It's only disabled optionally, like for local testing.
+#pragma warning disable CA5399 // HttpClient is created without enabling CheckCertificateRevocationList
+        _httpClient = new HttpClient(_certificateValidatingHandler)
         {
-            if (request.Headers.Authorization == null)
-            {
-                throw new ApiClientException("The request header should contain an authorization token.");
-            }
-
-            if (_expirationDateUtc < DateTime.UtcNow.AddSeconds(60))
-            {
-                var tokenResponse = await RestClient
-                    .For<IOrchardCoreAuthorizationApi>(defaultTenantUri)
-                    .TokenAsync(
-                        new Dictionary<string, string>
-                        {
-                            ["grant_type"] = "client_credentials",
-                            ["client_id"] = _apiClientSettings.ClientId,
-                            ["client_secret"] = _apiClientSettings.ClientSecret,
-                        });
-
-                tokenResponse.ResponseMessage.EnsureSuccessStatusCode();
-
-                if (tokenResponse.GetContent().Error != null)
-                {
-                    throw new ApiClientException(
-                        $"API client setup failed. An error occurred while retrieving an access token: " +
-                        tokenResponse.GetContent().Error);
-                }
-
-                int tokenExpiration = int.Parse(tokenResponse.GetContent().ExpiresIn, CultureInfo.InvariantCulture);
-
-                _expirationDateUtc = DateTime.UtcNow.AddSeconds(tokenExpiration);
-
-                _tokenResponse = tokenResponse.GetContent();
-            }
-
-            request.Headers.Authorization = new AuthenticationHeaderValue(
-                request.Headers.Authorization.Scheme, _tokenResponse.AccessToken);
-        });
+            BaseAddress = apiClientSettings.DefaultTenantUri,
+        };
+#pragma warning restore CA5399
+    }
 
     public async Task CreateAndSetupTenantAsync(
         TenantApiModel createApiViewModel,
@@ -94,6 +63,27 @@ public class ApiClient
         catch (Exception ex)
         {
             throw new ApiClientException("Tenant setup failed.", ex);
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_httpClient != null)
+        {
+            _httpClient.Dispose();
+            _httpClient = null;
+        }
+
+        if (_certificateValidatingHandler != null)
+        {
+            _certificateValidatingHandler.Dispose();
+            _certificateValidatingHandler = null;
         }
     }
 }
