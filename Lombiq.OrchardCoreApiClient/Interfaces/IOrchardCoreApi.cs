@@ -39,4 +39,31 @@ public interface IOrchardCoreApi
     [Post("api/tenants/edit")]
     [Header("Authorization", "Bearer")]
     Task<Response<string>> EditAsync([Body] TenantApiModel editTenantParameters);
+
+    /// <summary>
+    /// Remove a previously created tenant in Orchard Core.
+    /// </summary>
+    /// <param name="tenantName">The necessary parameter to remove a tenant.</param>
+    /// <returns>The response of the tenant removal.</returns>
+    [Post("api/tenants/remove")]
+    [Header("Authorization", "Bearer")]
+    Task<Response<string>> RemoveAsync([Body] string tenantName);
+
+    /// <summary>
+    /// Disable a previously created tenant in Orchard Core.
+    /// </summary>
+    /// <param name="tenantName">The necessary parameter to disable a tenant.</param>
+    /// <returns>The response of the tenant disable.</returns>
+    [Post("api/tenants/disable")]
+    [Header("Authorization", "Bearer")]
+    Task<Response<string>> DisableAsync([Body] string tenantName);
+
+    /// <summary>
+    /// Enable a previously disabled tenant in Orchard Core.
+    /// </summary>
+    /// <param name="tenantName">The necessary parameter to enable a tenant.</param>
+    /// <returns>The response of the tenant enable.</returns>
+    [Post("api/tenants/enable")]
+    [Header("Authorization", "Bearer")]
+    Task<Response<string>> EnableAsync([Body] string tenantName);
 }
