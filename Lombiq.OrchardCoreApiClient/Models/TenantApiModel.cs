@@ -15,6 +15,6 @@ public class TenantApiModel
     public string ConnectionString { get; set; }
     public string TablePrefix { get; set; }
     public string RecipeName { get; set; }
-    public IEnumerable<string> FeatureProfile { get; set; }
+    public IEnumerable<string> FeatureProfiles { get; set; }
     public string Category { get; set; }
 }
