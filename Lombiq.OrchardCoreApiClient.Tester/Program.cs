@@ -47,7 +47,7 @@ public static class Program
                     Password = "Password1!",
                     SiteName = "Api Client Tenant Site",
                     SiteTimeZone = "Europe/Budapest",
-                    TablePrefix = "apiclienttenant",
+                    TablePrefix = "apiclienttenant", // #spell-check-ignore-line
                 }
             );
 
