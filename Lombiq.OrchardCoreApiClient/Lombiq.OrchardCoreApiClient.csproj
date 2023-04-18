@@ -16,7 +16,11 @@
     <PackageProjectUrl>https://github.com/Lombiq/Orchard-Core-API-Client</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
   </PropertyGroup>
-  
+
+  <PropertyGroup>
+    <AnalyzeByOSOCE>true</AnalyzeByOSOCE>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="License.md" Pack="true" PackagePath="" />
     <None Include="Readme.md" />
