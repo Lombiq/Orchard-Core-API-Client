@@ -40,6 +40,10 @@ public interface IOrchardCoreApi
     [Header("Authorization", "Bearer")]
     Task<Response<string>> EditAsync([Body] TenantApiModel editTenantParameters);
 
+    [Post("api/tenants/custom-edit")]
+    [Header("Authorization", "Bearer")]
+    Task<Response<string>> CustomEditAsync([Body] TenantApiModel editTenantParameters);
+
     /// <summary>
     /// Remove a previously created tenant in Orchard Core.
     /// </summary>
