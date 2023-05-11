@@ -40,6 +40,13 @@ public interface IOrchardCoreApi
     [Header("Authorization", "Bearer")]
     Task<Response<string>> EditAsync([Body] TenantApiModel editTenantParameters);
 
+    /// <summary>
+    /// Edit a previously created tenant in Orchard Core with additional settings inside
+    /// <see cref="TenantApiModel.CustomSettings"/>. This endpoint is not implemented, implement on your own.
+    /// </summary>
+    /// <param name="editTenantParameters">The <see cref="TenantApiModel.CustomSettings"/> property in the
+    /// <see cref="TenantApiModel"/> is the additional property that is not processed in <see cref="EditAsync"/>.</param>
+    /// <returns>The response of the custom tenant edit.</returns>
     [Post("api/tenants/custom-edit")]
     [Header("Authorization", "Bearer")]
     Task<Response<string>> CustomEditAsync([Body] TenantApiModel editTenantParameters);
