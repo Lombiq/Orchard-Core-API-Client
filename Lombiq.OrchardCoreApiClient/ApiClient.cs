@@ -2,6 +2,7 @@ using Lombiq.OrchardCoreApiClient.Constants;
 using Lombiq.OrchardCoreApiClient.Exceptions;
 using Lombiq.OrchardCoreApiClient.Interfaces;
 using Lombiq.OrchardCoreApiClient.Models;
+using Refit;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -10,24 +11,25 @@ namespace Lombiq.OrchardCoreApiClient;
 
 public class ApiClient : IDisposable
 {
-    private Lazy<IOrchardCoreApi> LazyOrchardCoreApi => new(() => RestClient.For<IOrchardCoreApi>(_httpClient));
+    private readonly Lazy<IOrchardCoreApi> _lazyOrchardCoreApi;
+
     private ConfigurableCertificateValidatingHttpClientHandler _certificateValidatingHandler;
     private HttpClient _httpClient;
 
-    public IOrchardCoreApi OrchardCoreApi => LazyOrchardCoreApi.Value;
+    public IOrchardCoreApi OrchardCoreApi => _lazyOrchardCoreApi.Value;
 
-    public ApiClient(ApiClientSettings apiClientSettings)
-    {
-        _certificateValidatingHandler = new ConfigurableCertificateValidatingHttpClientHandler(apiClientSettings);
-
-        // It's only disabled optionally, like for local testing.
-#pragma warning disable CA5399 // HttpClient is created without enabling CheckCertificateRevocationList
-        _httpClient = new HttpClient(_certificateValidatingHandler)
+    public ApiClient(ApiClientSettings apiClientSettings) =>
+        _lazyOrchardCoreApi = new(() =>
         {
-            BaseAddress = apiClientSettings.DefaultTenantUri,
-        };
-#pragma warning restore CA5399
-    }
+            _certificateValidatingHandler = new ConfigurableCertificateValidatingHttpClientHandler(apiClientSettings);
+
+            _httpClient = new HttpClient(_certificateValidatingHandler)
+            {
+                BaseAddress = apiClientSettings.DefaultTenantUri,
+            };
+
+            return RestService.For<IOrchardCoreApi>(_httpClient);
+        });
 
     public async Task CreateAndSetupTenantAsync(
         TenantApiModel createApiViewModel,
@@ -73,6 +75,11 @@ public class ApiClient : IDisposable
 
     protected virtual void Dispose(bool disposing)
     {
+        if (!_lazyOrchardCoreApi.IsValueCreated) return;
+
+        object api = _lazyOrchardCoreApi.Value;
+        (api as IDisposable)?.Dispose();
+
         if (_httpClient != null)
         {
             _httpClient.Dispose();

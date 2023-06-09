@@ -1,6 +1,7 @@
 using Lombiq.OrchardCoreApiClient.Exceptions;
 using Lombiq.OrchardCoreApiClient.Interfaces;
 using Lombiq.OrchardCoreApiClient.Models;
+using Refit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -62,7 +63,7 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
             };
 #pragma warning restore CA5400
 
-            var tokenResponse = await RestClient
+            var tokenResponse = await RestService
                 .For<IOrchardCoreAuthorizationApi>(httpClient)
                 .TokenAsync(
                     new Dictionary<string, string>
