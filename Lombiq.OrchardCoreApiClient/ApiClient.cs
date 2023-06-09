@@ -23,10 +23,13 @@ public class ApiClient : IDisposable
         {
             _certificateValidatingHandler = new ConfigurableCertificateValidatingHttpClientHandler(apiClientSettings);
 
+            // It's only disabled optionally, like for local testing.
+#pragma warning disable CA5399 // HttpClient is created without enabling CheckCertificateRevocationList
             _httpClient = new HttpClient(_certificateValidatingHandler)
             {
                 BaseAddress = apiClientSettings.DefaultTenantUri,
             };
+#pragma warning restore CA5399
 
             return RestService.For<IOrchardCoreApi>(_httpClient);
         });

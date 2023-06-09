@@ -1,6 +1,6 @@
 ﻿namespace Lombiq.OrchardCoreApiClient.Constants;
 
-public class CommonHeaders
+public static class CommonHeaders
 {
     public const string AuthorizationBearer = "Authorization: Bearer";
 }

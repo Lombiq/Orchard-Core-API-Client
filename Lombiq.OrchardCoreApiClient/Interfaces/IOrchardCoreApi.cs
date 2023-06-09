@@ -10,7 +10,6 @@ namespace Lombiq.OrchardCoreApiClient.Interfaces;
 /// </summary>
 public interface IOrchardCoreApi
 {
-
     /// <summary>
     /// Create a new tenant in Orchard Core.
     /// </summary>
