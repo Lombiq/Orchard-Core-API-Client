@@ -44,24 +44,18 @@ public class ApiClient : IDisposable
 
         try
         {
-            (await OrchardCoreApi.
-                CreateAsync(createApiViewModel).
-                ConfigureAwait(false)).
-                ResponseMessage.EnsureSuccessStatusCode();
+            await OrchardCoreApi.CreateAsync(createApiViewModel).ConfigureAwait(false);
         }
-        catch (Exception ex)
+        catch (ApiException ex)
         {
             throw new ApiClientException("Tenant creation failed.", ex);
         }
 
         try
         {
-            (await OrchardCoreApi.
-                SetupAsync(setupApiViewModel).
-                ConfigureAwait(false)).
-                ResponseMessage.EnsureSuccessStatusCode();
+            await OrchardCoreApi.SetupAsync(setupApiViewModel).ConfigureAwait(false);
         }
-        catch (Exception ex)
+        catch (ApiException ex)
         {
             throw new ApiClientException("Tenant setup failed.", ex);
         }
