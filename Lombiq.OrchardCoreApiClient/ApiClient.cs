@@ -74,9 +74,6 @@ public class ApiClient : IDisposable
     {
         if (!_lazyOrchardCoreApi.IsValueCreated) return;
 
-        object api = _lazyOrchardCoreApi.Value;
-        (api as IDisposable)?.Dispose();
-
         if (_httpClient != null)
         {
             _httpClient.Dispose();
