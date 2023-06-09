@@ -17,7 +17,7 @@ public interface IOrchardCoreApi
     /// The necessary parameters to create a tenant: Name, RequestUrlPrefix etc.
     /// </param>
     /// <returns>The response of the tenant creation.</returns>
-    [Post("api/tenants/create")]
+    [Post("/api/tenants/create")]
     [Headers(AuthorizationBearer)]
     Task<string> CreateAsync([Body] TenantApiModel createTenantParameters);
 
@@ -28,7 +28,7 @@ public interface IOrchardCoreApi
     /// The necessary parameters to set up a tenant: Name, ConnectionString etc.
     /// </param>
     /// <returns>The response of the tenant setup.</returns>
-    [Post("api/tenants/setup")]
+    [Post("/api/tenants/setup")]
     [Headers(AuthorizationBearer)]
     Task<string> SetupAsync([Body] TenantSetupApiModel setupTenantParameters);
 
@@ -37,7 +37,7 @@ public interface IOrchardCoreApi
     /// </summary>
     /// <param name="editTenantParameters">The necessary parameter to edit a tenant: Name.</param>
     /// <returns>The response of the tenant edit.</returns>
-    [Post("api/tenants/edit")]
+    [Post("/api/tenants/edit")]
     [Headers(AuthorizationBearer)]
     Task<string> EditAsync([Body] TenantApiModel editTenantParameters);
 
@@ -48,7 +48,7 @@ public interface IOrchardCoreApi
     /// <param name="editTenantParameters">The <see cref="TenantApiModel.CustomSettings"/> property in the
     /// <see cref="TenantApiModel"/> is the additional property that is not processed in <see cref="EditAsync"/>.</param>
     /// <returns>The response of the custom tenant edit.</returns>
-    [Post("api/tenants/custom-edit")]
+    [Post("/api/tenants/custom-edit")]
     [Headers(AuthorizationBearer)]
     Task<string> CustomEditAsync([Body] TenantApiModel editTenantParameters);
 
@@ -57,7 +57,7 @@ public interface IOrchardCoreApi
     /// </summary>
     /// <param name="tenantName">The necessary parameter to remove a tenant.</param>
     /// <returns>The response of the tenant removal.</returns>
-    [Post("api/tenants/remove/{tenantName}")]
+    [Post("/api/tenants/remove/{tenantName}")]
     [Headers(AuthorizationBearer)]
     Task<string> RemoveAsync(string tenantName);
 
@@ -66,7 +66,7 @@ public interface IOrchardCoreApi
     /// </summary>
     /// <param name="tenantName">The necessary parameter to disable a tenant.</param>
     /// <returns>The response of the tenant disable.</returns>
-    [Post("api/tenants/disable/{tenantName}")]
+    [Post("/api/tenants/disable/{tenantName}")]
     [Headers(AuthorizationBearer)]
     Task<string> DisableAsync(string tenantName);
 
@@ -75,7 +75,7 @@ public interface IOrchardCoreApi
     /// </summary>
     /// <param name="tenantName">The necessary parameter to enable a tenant.</param>
     /// <returns>The response of the tenant enable.</returns>
-    [Post("api/tenants/enable/{tenantName}")]
+    [Post("/api/tenants/enable/{tenantName}")]
     [Headers(AuthorizationBearer)]
     Task<string> EnableAsync(string tenantName);
 }
