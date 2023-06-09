@@ -2,7 +2,6 @@ using Lombiq.OrchardCoreApiClient.Constants;
 using Lombiq.OrchardCoreApiClient.Exceptions;
 using Lombiq.OrchardCoreApiClient.Interfaces;
 using Lombiq.OrchardCoreApiClient.Models;
-using RestEase;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;

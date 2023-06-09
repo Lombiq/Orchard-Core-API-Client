@@ -1,5 +1,4 @@
 using Lombiq.OrchardCoreApiClient.Models;
-using RestEase;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
