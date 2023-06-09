@@ -1,4 +1,5 @@
 using Lombiq.OrchardCoreApiClient.Models;
+using Refit;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -17,7 +18,7 @@ public interface IOrchardCoreAuthorizationApi
     /// </param>
     /// <returns>The token that can be passed to Orchard Core to validate the request.</returns>
     [Post("connect/token")]
-    Task<Response<Token>> TokenAsync(
+    Task<Token> TokenAsync(
         [Body(BodySerializationMethod.UrlEncoded)]
         IDictionary<string, string> openIdConnectRequestParameters);
 }

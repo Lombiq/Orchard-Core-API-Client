@@ -73,20 +73,16 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
                         ["client_secret"] = _apiClientSettings.ClientSecret,
                     });
 
-            tokenResponse.ResponseMessage.EnsureSuccessStatusCode();
-
-            if (tokenResponse.GetContent().Error != null)
+            if (tokenResponse.Error is { } error)
             {
                 throw new ApiClientException(
-                    $"API client setup failed. An error occurred while retrieving an access token: " +
-                    tokenResponse.GetContent().Error);
+                    $"API client setup failed. An error occurred while retrieving an access token: {error}");
             }
 
-            int tokenExpiration = int.Parse(tokenResponse.GetContent().ExpiresIn, CultureInfo.InvariantCulture);
-
+            int tokenExpiration = int.Parse(tokenResponse.ExpiresIn, CultureInfo.InvariantCulture);
             _expirationDateUtc = DateTime.UtcNow.AddSeconds(tokenExpiration);
 
-            _tokenResponse = tokenResponse.GetContent();
+            _tokenResponse = tokenResponse;
         }
 
         request.Headers.Authorization = new AuthenticationHeaderValue(
