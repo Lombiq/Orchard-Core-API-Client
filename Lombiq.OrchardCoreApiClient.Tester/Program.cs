@@ -69,6 +69,7 @@ public static class Program
             Category = "API Client - Edited Tenants",
         };
 
+        // Requires Orchard Core 1.6.0 or newer, on a 1.5.0 server this returns a 404 error.
         await apiClient.OrchardCoreApi.EditAsync(editModel);
 
         Console.WriteLine("Editing the tenant succeeded.");
