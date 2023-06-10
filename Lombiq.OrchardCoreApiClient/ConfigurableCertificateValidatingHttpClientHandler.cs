@@ -66,7 +66,6 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
             Token tokenResponse;
             try
             {
-
                 tokenResponse = await RefitHelper
                     .WithNewtonsoftJson<IOrchardCoreAuthorizationApi>(httpClient)
                     .TokenAsync(
@@ -79,7 +78,9 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
             }
             catch (Exception exception)
             {
-                
+                throw new ApiClientException(
+                    $"API client setup failed. An error occurred while retrieving an access token: {exception.Message}",
+                    exception);
             }
 
             if (tokenResponse.Error is { } error)
