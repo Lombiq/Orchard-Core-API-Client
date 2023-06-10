@@ -23,11 +23,11 @@ public static class Program
         {
             ClientId = ClientId,
             ClientSecret = ClientSecret,
-            DefaultTenantUri = new Uri("https://localhost:" + port.ToString(CultureInfo.InvariantCulture)),
+            DefaultTenantUri = new Uri("https://localhost:" + port.ToTechnicalString()),
         });
 
         // A suffix is used to avoid name clashes on an existing site, as this test doesn't delete tenants.
-        var suffix = DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
+        var suffix = DateTime.Now.Ticks.ToTechnicalString();
         var name = "ApiClientTenant" + suffix;
 
         await apiClient.CreateAndSetupTenantAsync(
