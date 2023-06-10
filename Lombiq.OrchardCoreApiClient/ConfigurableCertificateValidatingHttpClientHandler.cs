@@ -2,7 +2,6 @@ using Lombiq.HelpfulLibraries.Refit.Helpers;
 using Lombiq.OrchardCoreApiClient.Exceptions;
 using Lombiq.OrchardCoreApiClient.Interfaces;
 using Lombiq.OrchardCoreApiClient.Models;
-using Refit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
