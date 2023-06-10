@@ -68,7 +68,7 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
             {
 
                 tokenResponse = await RefitHelper
-                    .WithNewtonsoft<IOrchardCoreAuthorizationApi>(httpClient)
+                    .WithNewtonsoftJson<IOrchardCoreAuthorizationApi>(httpClient)
                     .TokenAsync(
                         new Dictionary<string, string>
                         {
