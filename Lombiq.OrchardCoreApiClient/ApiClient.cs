@@ -1,3 +1,4 @@
+using Lombiq.HelpfulLibraries.Refit.Helpers;
 using Lombiq.OrchardCoreApiClient.Constants;
 using Lombiq.OrchardCoreApiClient.Exceptions;
 using Lombiq.OrchardCoreApiClient.Interfaces;
@@ -31,7 +32,7 @@ public class ApiClient : IDisposable
             };
 #pragma warning restore CA5399
 
-            return RestService.For<IOrchardCoreApi>(_httpClient);
+            return RefitHelper.WithNewtonsoft<IOrchardCoreApi>(_httpClient);
         });
 
     public async Task CreateAndSetupTenantAsync(
