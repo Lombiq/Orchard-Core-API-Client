@@ -32,6 +32,7 @@ public class ApiClient : IDisposable
             };
 #pragma warning restore CA5399
 
+            // We use Newtonsoft Json.NET because Orchard Core uses it too, so the models will behave the same.
             return RefitHelper.WithNewtonsoft<IOrchardCoreApi>(_httpClient);
         });
 
