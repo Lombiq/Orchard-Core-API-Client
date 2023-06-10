@@ -63,15 +63,24 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
             };
 #pragma warning restore CA5400
 
-            var tokenResponse = await RefitHelper
-                .WithNewtonsoft<IOrchardCoreAuthorizationApi>(httpClient)
-                .TokenAsync(
-                    new Dictionary<string, string>
-                    {
-                        ["grant_type"] = "client_credentials",
-                        ["client_id"] = _apiClientSettings.ClientId,
-                        ["client_secret"] = _apiClientSettings.ClientSecret,
-                    });
+            Token tokenResponse;
+            try
+            {
+
+                tokenResponse = await RefitHelper
+                    .WithNewtonsoft<IOrchardCoreAuthorizationApi>(httpClient)
+                    .TokenAsync(
+                        new Dictionary<string, string>
+                        {
+                            ["grant_type"] = "client_credentials",
+                            ["client_id"] = _apiClientSettings.ClientId,
+                            ["client_secret"] = _apiClientSettings.ClientSecret,
+                        });
+            }
+            catch (Exception exception)
+            {
+                
+            }
 
             if (tokenResponse.Error is { } error)
             {
