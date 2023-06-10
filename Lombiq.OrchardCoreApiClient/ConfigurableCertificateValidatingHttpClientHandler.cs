@@ -21,7 +21,7 @@ namespace Lombiq.OrchardCoreApiClient;
         "Security",
         "S4830: Enable server certificate validation on this SSL/TLS connection",
         Justification = "It's only disabled optionally, like for local testing.")]
-internal class ConfigurableCertificateValidatingHttpClientHandler : HttpClientHandler
+internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpClientHandler
 {
     private readonly ApiClientSettings _apiClientSettings;
 
