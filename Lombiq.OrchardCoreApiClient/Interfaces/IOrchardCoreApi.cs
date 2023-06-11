@@ -19,7 +19,7 @@ public interface IOrchardCoreApi
     /// <returns>The response of the tenant creation.</returns>
     [Post("/api/tenants/create")]
     [Headers(AuthorizationBearer)]
-    Task<string> CreateAsync([Body] TenantApiModel createTenantParameters);
+    Task<ApiResponse<string>> CreateAsync([Body] TenantApiModel createTenantParameters);
 
     /// <summary>
     /// Setup the previously created tenant in Orchard Core.

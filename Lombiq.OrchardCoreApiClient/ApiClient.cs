@@ -49,7 +49,8 @@ public class ApiClient : IDisposable
 
         try
         {
-            await OrchardCoreApi.CreateAsync(createApiViewModel).ConfigureAwait(false);
+            using var response = await OrchardCoreApi.CreateAsync(createApiViewModel).ConfigureAwait(false);
+            await response.EnsureSuccessStatusCodeAsync();
         }
         catch (ApiException ex)
         {
