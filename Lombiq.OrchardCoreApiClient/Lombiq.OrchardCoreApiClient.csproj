@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <DefaultItemExcludes>$(DefaultItemExcludes);.git*</DefaultItemExcludes>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <Title>Lombiq API Client for Orchard Core</Title>
     <Authors>Lombiq Technologies</Authors>
@@ -16,21 +16,25 @@
     <PackageProjectUrl>https://github.com/Lombiq/Orchard-Core-API-Client</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <None Include="License.md" Pack="true" PackagePath="" />
     <None Include="Readme.md" />
     <None Include="NuGetIcon.png" Pack="true" PackagePath="" />
   </ItemGroup>
-      	
+
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="6.0.0-preview.4.21253.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="NodaTime" Version="3.1.5" />
   </ItemGroup>
-      	
-  <ItemGroup Condition="'$(NuGetBuild)' != 'true'">
+
+  <ItemGroup Condition="'$(NuGetBuild)' != 'true' and Exists($(LombiqHelpfulLibrariesPath))">
+    <ProjectReference Include="$(LombiqHelpfulLibrariesPath)\Lombiq.HelpfulLibraries.Refit\Lombiq.HelpfulLibraries.Refit.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(NuGetBuild)' != 'true' and !Exists($(LombiqHelpfulLibrariesPath))">
     <ProjectReference Include="..\..\Lombiq.HelpfulLibraries\Lombiq.HelpfulLibraries.Refit\Lombiq.HelpfulLibraries.Refit.csproj" />
   </ItemGroup>
 
