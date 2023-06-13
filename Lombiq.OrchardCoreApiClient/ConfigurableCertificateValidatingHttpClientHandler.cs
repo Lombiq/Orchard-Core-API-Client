@@ -1,7 +1,7 @@
+using Lombiq.HelpfulLibraries.Refit.Helpers;
 using Lombiq.OrchardCoreApiClient.Exceptions;
 using Lombiq.OrchardCoreApiClient.Interfaces;
 using Lombiq.OrchardCoreApiClient.Models;
-using RestEase;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -63,30 +63,36 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
             };
 #pragma warning restore CA5400
 
-            var tokenResponse = await RestClient
-                .For<IOrchardCoreAuthorizationApi>(httpClient)
-                .TokenAsync(
-                    new Dictionary<string, string>
-                    {
-                        ["grant_type"] = "client_credentials",
-                        ["client_id"] = _apiClientSettings.ClientId,
-                        ["client_secret"] = _apiClientSettings.ClientSecret,
-                    });
-
-            tokenResponse.ResponseMessage.EnsureSuccessStatusCode();
-
-            if (tokenResponse.GetContent().Error != null)
+            Token tokenResponse;
+            try
+            {
+                tokenResponse = await RefitHelper
+                    .WithNewtonsoftJson<IOrchardCoreAuthorizationApi>(httpClient)
+                    .TokenAsync(
+                        new Dictionary<string, string>
+                        {
+                            ["grant_type"] = "client_credentials",
+                            ["client_id"] = _apiClientSettings.ClientId,
+                            ["client_secret"] = _apiClientSettings.ClientSecret,
+                        });
+            }
+            catch (Exception exception)
             {
                 throw new ApiClientException(
-                    $"API client setup failed. An error occurred while retrieving an access token: " +
-                    tokenResponse.GetContent().Error);
+                    $"API client setup failed. An error occurred while retrieving an access token: {exception.Message}",
+                    exception);
             }
 
-            int tokenExpiration = int.Parse(tokenResponse.GetContent().ExpiresIn, CultureInfo.InvariantCulture);
+            if (tokenResponse.Error is { } error)
+            {
+                throw new ApiClientException(
+                    $"API client setup failed. An error occurred while retrieving an access token: {error}");
+            }
 
+            int tokenExpiration = int.Parse(tokenResponse.ExpiresIn, CultureInfo.InvariantCulture);
             _expirationDateUtc = DateTime.UtcNow.AddSeconds(tokenExpiration);
 
-            _tokenResponse = tokenResponse.GetContent();
+            _tokenResponse = tokenResponse;
         }
 
         request.Headers.Authorization = new AuthenticationHeaderValue(

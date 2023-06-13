@@ -1,8 +1,9 @@
+using Lombiq.HelpfulLibraries.Refit.Helpers;
 using Lombiq.OrchardCoreApiClient.Constants;
 using Lombiq.OrchardCoreApiClient.Exceptions;
 using Lombiq.OrchardCoreApiClient.Interfaces;
 using Lombiq.OrchardCoreApiClient.Models;
-using RestEase;
+using Refit;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -11,24 +12,29 @@ namespace Lombiq.OrchardCoreApiClient;
 
 public class ApiClient : IDisposable
 {
-    private Lazy<IOrchardCoreApi> LazyOrchardCoreApi => new(() => RestClient.For<IOrchardCoreApi>(_httpClient));
+    private readonly Lazy<IOrchardCoreApi> _lazyOrchardCoreApi;
+
     private ConfigurableCertificateValidatingHttpClientHandler _certificateValidatingHandler;
     private HttpClient _httpClient;
 
-    public IOrchardCoreApi OrchardCoreApi => LazyOrchardCoreApi.Value;
+    public IOrchardCoreApi OrchardCoreApi => _lazyOrchardCoreApi.Value;
 
-    public ApiClient(ApiClientSettings apiClientSettings)
-    {
-        _certificateValidatingHandler = new ConfigurableCertificateValidatingHttpClientHandler(apiClientSettings);
-
-        // It's only disabled optionally, like for local testing.
-#pragma warning disable CA5399 // HttpClient is created without enabling CheckCertificateRevocationList
-        _httpClient = new HttpClient(_certificateValidatingHandler)
+    public ApiClient(ApiClientSettings apiClientSettings) =>
+        _lazyOrchardCoreApi = new(() =>
         {
-            BaseAddress = apiClientSettings.DefaultTenantUri,
-        };
+            _certificateValidatingHandler = new ConfigurableCertificateValidatingHttpClientHandler(apiClientSettings);
+
+            // It's only disabled optionally, like for local testing.
+#pragma warning disable CA5399 // HttpClient is created without enabling CheckCertificateRevocationList
+            _httpClient = new HttpClient(_certificateValidatingHandler)
+            {
+                BaseAddress = apiClientSettings.DefaultTenantUri,
+            };
 #pragma warning restore CA5399
-    }
+
+            // We use Newtonsoft Json.NET because Orchard Core uses it too, so the models will behave the same.
+            return RefitHelper.WithNewtonsoftJson<IOrchardCoreApi>(_httpClient);
+        });
 
     public async Task CreateAndSetupTenantAsync(
         TenantApiModel createApiViewModel,
@@ -43,24 +49,19 @@ public class ApiClient : IDisposable
 
         try
         {
-            (await OrchardCoreApi.
-                CreateAsync(createApiViewModel).
-                ConfigureAwait(false)).
-                ResponseMessage.EnsureSuccessStatusCode();
+            using var response = await OrchardCoreApi.CreateAsync(createApiViewModel).ConfigureAwait(false);
+            await response.EnsureSuccessStatusCodeAsync();
         }
-        catch (Exception ex)
+        catch (ApiException ex)
         {
             throw new ApiClientException("Tenant creation failed.", ex);
         }
 
         try
         {
-            (await OrchardCoreApi.
-                SetupAsync(setupApiViewModel).
-                ConfigureAwait(false)).
-                ResponseMessage.EnsureSuccessStatusCode();
+            await OrchardCoreApi.SetupAsync(setupApiViewModel).ConfigureAwait(false);
         }
-        catch (Exception ex)
+        catch (ApiException ex)
         {
             throw new ApiClientException("Tenant setup failed.", ex);
         }
@@ -74,6 +75,8 @@ public class ApiClient : IDisposable
 
     protected virtual void Dispose(bool disposing)
     {
+        if (!_lazyOrchardCoreApi.IsValueCreated) return;
+
         if (_httpClient != null)
         {
             _httpClient.Dispose();

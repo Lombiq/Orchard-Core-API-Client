@@ -11,7 +11,7 @@
     <Copyright>Copyright © 2022, Lombiq Technologies Ltd.</Copyright>
     <Description>Lombiq API Client for Orchard Core: A client library for communicating with the Orchard Core web APIs.</Description>
     <PackageIcon>NuGetIcon.png</PackageIcon>
-    <PackageTags>OrchardCore;Lombiq;RestEase;OpenId;ApiClient</PackageTags>
+    <PackageTags>OrchardCore;Lombiq;Refit;OpenId;ApiClient</PackageTags>
     <RepositoryUrl>https://github.com/Lombiq/Orchard-Core-API-Client</RepositoryUrl>
     <PackageProjectUrl>https://github.com/Lombiq/Orchard-Core-API-Client</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
@@ -26,9 +26,20 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="6.0.0-preview.4.21253.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="RestEase" Version="1.5.7" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="NodaTime" Version="3.1.9" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(NuGetBuild)' != 'true' and Exists($(LombiqHelpfulLibrariesPath))">
+    <ProjectReference Include="$(LombiqHelpfulLibrariesPath)\Lombiq.HelpfulLibraries.Refit\Lombiq.HelpfulLibraries.Refit.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(NuGetBuild)' != 'true' and !Exists($(LombiqHelpfulLibrariesPath))">
+    <ProjectReference Include="..\..\Lombiq.HelpfulLibraries\Lombiq.HelpfulLibraries.Refit\Lombiq.HelpfulLibraries.Refit.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(NuGetBuild)' == 'true'">
+    <PackageReference Include="Lombiq.HelpfulLibraries.Refit" Version="5.1.3-alpha.1.osoe-628" />
   </ItemGroup>
 
 </Project>
