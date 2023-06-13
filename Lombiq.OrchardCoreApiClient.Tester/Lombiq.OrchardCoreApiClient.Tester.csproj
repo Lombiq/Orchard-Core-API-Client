@@ -6,6 +6,7 @@
   </PropertyGroup>
 	
   <ItemGroup>
+    <ProjectReference Include="..\..\Lombiq.HelpfulLibraries\Lombiq.HelpfulLibraries.Common\Lombiq.HelpfulLibraries.Common.csproj" />
     <ProjectReference Include="..\Lombiq.OrchardCoreApiClient\Lombiq.OrchardCoreApiClient.csproj" />
   </ItemGroup>
 
