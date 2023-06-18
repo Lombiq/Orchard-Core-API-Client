@@ -1,5 +1,6 @@
 using Lombiq.OrchardCoreApiClient.Models;
 using Refit;
+using System;
 using System.Threading.Tasks;
 using static Lombiq.OrchardCoreApiClient.Constants.CommonHeaders;
 
@@ -50,6 +51,7 @@ public interface IOrchardCoreApi
     /// <returns>The response of the custom tenant edit.</returns>
     [Post("/api/tenants/custom-edit")]
     [Headers(AuthorizationBearer)]
+    [Obsolete("This shouldn't be here and will be soon removed, see https://github.com/Lombiq/Orchard-Core-API-Client/issues/30.")]
     Task<string> CustomEditAsync([Body] TenantApiModel editTenantParameters);
 
     /// <summary>
