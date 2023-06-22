@@ -15,6 +15,8 @@ public static class TestCaseUITestContextExtensions
     // the parent app needs that to be configured if tenant removal should work.
     public static async Task TestOrchardCoreApiClientBehaviorAsync(
         this UITestContext context,
+        string clientId = null,
+        string clientSecret = null,
         string featureProfile = null)
     {
         const string tenantName = "UITestTenant";
@@ -62,13 +64,16 @@ public static class TestCaseUITestContextExtensions
 
         using var apiClient = new ApiClient(new ApiClientSettings
         {
-            ClientId = "UITest",
-            ClientSecret = "Password",
+            ClientId = clientId ?? "UITest",
+            ClientSecret = clientSecret ?? "Password",
             DefaultTenantUri = context.Scope.BaseUri,
             DisableCertificateValidation = true,
         });
 
-        await context.ExecuteRecipeDirectlyAsync("Lombiq.OrchardCoreApiClient.Tests.UI.OpenId");
+        if (string.IsNullOrEmpty(clientId))
+        {
+            await context.ExecuteRecipeDirectlyAsync("Lombiq.OrchardCoreApiClient.Tests.UI.OpenId");
+        }
 
         await context.SignInDirectlyAsync();
 
