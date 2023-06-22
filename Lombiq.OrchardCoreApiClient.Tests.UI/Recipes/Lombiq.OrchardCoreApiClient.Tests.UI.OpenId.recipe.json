@@ -1,7 +1,7 @@
 {
-  "name": "Lombiq.OrchardCoreApiClient.Tester.OpenId",
-  "displayName": "Lombiq API Client for Orchard Core - Tester App - OpenId",
-  "description": "Set up the OpenId server and application to allow access to the web APIs from the Tester App of Lombiq API Client for Orchard Core.",
+  "name": "Lombiq.OrchardCoreApiClient.Tests.UI.OpenId",
+  "displayName": "Lombiq API Client for Orchard Core - UI Test Extensions - OpenId",
+  "description": "Set up the OpenId server and application to allow access to the web APIs for UI testing from the Lombiq API Client for Orchard Core.",
   "author": "Lombiq Technologies",
   "website": "https://github.com/Lombiq/Orchard-Core-API-Client",
   "version": "1.0",
@@ -42,8 +42,8 @@
     },
     {
       "name": "openidapplication",
-      "ClientId": "Console",
-      "DisplayName": "Console",
+      "ClientId": "UITest",
+      "DisplayName": "UITest",
       "Type": "Confidential",
       "ClientSecret": "Password",
       "EnableTokenEndpoint": true,

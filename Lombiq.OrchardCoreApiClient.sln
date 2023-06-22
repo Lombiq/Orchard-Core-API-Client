@@ -5,6 +5,8 @@ VisualStudioVersion = 17.2.32602.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lombiq.OrchardCoreApiClient", "Lombiq.OrchardCoreApiClient\Lombiq.OrchardCoreApiClient.csproj", "{EAD21B5C-6E65-402A-AFF4-8472D0FABCF4}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lombiq.OrchardCoreApiClient.Tests.UI", "Lombiq.OrchardCoreApiClient.Tests.UI\Lombiq.OrchardCoreApiClient.Tests.UI.csproj", "{4A4A2815-C994-40D1-B16D-453ECDCC0819}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{EAD21B5C-6E65-402A-AFF4-8472D0FABCF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAD21B5C-6E65-402A-AFF4-8472D0FABCF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAD21B5C-6E65-402A-AFF4-8472D0FABCF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A4A2815-C994-40D1-B16D-453ECDCC0819}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A4A2815-C994-40D1-B16D-453ECDCC0819}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A4A2815-C994-40D1-B16D-453ECDCC0819}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A4A2815-C994-40D1-B16D-453ECDCC0819}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
