@@ -20,13 +20,16 @@ public static class TestCaseUITestContextExtensions
 
         const string tenantName = "UITestTenant";
         const string prefix = "uitesttenant"; // #spell-check-ignore-line
+        var databaseProvider = context.Configuration.UseSqlServer
+            ? "SqlConnection"
+            : "Sqlite";
 
         await apiClient.CreateAndSetupTenantAsync(
             new TenantApiModel
             {
                 Description = "Tenant created by UI test",
                 Name = tenantName,
-                DatabaseProvider = "Sqlite",
+                DatabaseProvider = databaseProvider,
                 RequestUrlPrefix = prefix,
                 RequestUrlHost = string.Empty,
                 ConnectionString = string.Empty,
@@ -37,7 +40,7 @@ public static class TestCaseUITestContextExtensions
             new TenantSetupApiModel
             {
                 Name = tenantName,
-                DatabaseProvider = "Sqlite",
+                DatabaseProvider = databaseProvider,
                 ConnectionString = string.Empty,
                 RecipeName = "Blog",
                 UserName = "admin",
