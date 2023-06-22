@@ -19,7 +19,7 @@ public static class TestCaseUITestContextExtensions
         });
 
         const string tenantName = "UITestTenant";
-        const string prefix = "uitesttenant";
+        const string prefix = "uitesttenant"; // #spell-check-ignore-line
 
         await apiClient.CreateAndSetupTenantAsync(
             new TenantApiModel
