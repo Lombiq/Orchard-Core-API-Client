@@ -72,7 +72,7 @@ public static class TestCaseUITestContextExtensions
 
         await TestTenantCreateAsync(context, apiClient, createApiModel);
         await TestTenantSetupAsync(context, apiClient, createApiModel, setupApiModel);
-        await TestTenantEditAsync(context, apiClient, editModel);
+        await TestTenantEditAsync(context, apiClient, editModel, setupApiModel);
     }
 
     private static async Task TestTenantCreateAsync(
@@ -83,22 +83,9 @@ public static class TestCaseUITestContextExtensions
         await apiClient.OrchardCoreApi.CreateAsync(createApiModel);
 
         await context.GoToAdminRelativeUrlAsync("/Tenants");
-
         context.Exists(By.LinkText(createApiModel.Name));
 
-        await context.GoToAdminRelativeUrlAsync("/Tenants/Edit/" + createApiModel.Name);
-
-        context.Get(By.CssSelector("#Description")).GetValue()
-            .ShouldBe(createApiModel.Description);
-
-        context.Get(By.CssSelector("#RequestUrlPrefix")).GetValue()
-            .ShouldBe(createApiModel.RequestUrlPrefix);
-
-        context.Get(By.CssSelector("#RequestUrlHost")).GetValue()
-            .ShouldBe(createApiModel.RequestUrlHost);
-
-        context.Get(By.CssSelector("#Category")).GetValue()
-            .ShouldBe(createApiModel.Category);
+        await GoToTenantEditorAndAssertCommonTenantFieldsAsync(context, createApiModel);
 
         context.Get(By.CssSelector("#RecipeName option[selected]")).Text
             .ShouldBe(createApiModel.RecipeName);
@@ -141,24 +128,45 @@ public static class TestCaseUITestContextExtensions
     private static async Task TestTenantEditAsync(
         UITestContext context,
         ApiClient apiClient,
-        TenantApiModel editModel)
+        TenantApiModel editModel,
+        TenantSetupApiModel setupApiModel)
     {
         await apiClient.OrchardCoreApi.EditAsync(editModel);
 
-        await context.GoToAdminRelativeUrlAsync("/Tenants/Edit/" + editModel.Name);
+        await GoToTenantEditorAndAssertCommonTenantFieldsAsync(context, editModel);
 
-        context.Get(By.CssSelector("#Description")).GetValue()
-            .ShouldBe(editModel.Description);
+        await context.GoToRelativeUrlAsync(editModel.RequestUrlPrefix);
 
-        context.Get(By.CssSelector("#RequestUrlPrefix")).GetValue()
-            .ShouldBe(editModel.RequestUrlPrefix);
+        context.Get(By.ClassName("navbar-brand")).Text
+            .ShouldBe(setupApiModel.SiteName);
 
-        context.Get(By.CssSelector("#RequestUrlHost")).GetValue()
-            .ShouldBe(editModel.RequestUrlHost);
+        editModel.RequestUrlPrefix = string.Empty;
+        editModel.RequestUrlHost = "https://example.com";
 
-        context.Get(By.CssSelector("#Category")).GetValue()
-            .ShouldBe(editModel.Category);
+        await apiClient.OrchardCoreApi.EditAsync(editModel);
+
+        await GoToTenantEditorAndAssertCommonTenantFieldsAsync(context, editModel);
 
         context.Configuration.TestOutputHelper.WriteLine("Editing the tenant succeeded.");
+    }
+
+    private static Task GoToTenantEditorAsync(UITestContext context, TenantApiModel apiModel) =>
+        context.GoToAdminRelativeUrlAsync("/Tenants/Edit/" + apiModel.Name);
+
+    private static async Task GoToTenantEditorAndAssertCommonTenantFieldsAsync(UITestContext context, TenantApiModel apiModel)
+    {
+        await GoToTenantEditorAsync(context, apiModel);
+
+        context.Get(By.CssSelector("#Description")).GetValue()
+            .ShouldBe(apiModel.Description);
+
+        context.Get(By.CssSelector("#RequestUrlPrefix")).GetValue()
+            .ShouldBe(apiModel.RequestUrlPrefix);
+
+        context.Get(By.CssSelector("#RequestUrlHost")).GetValue()
+            .ShouldBe(apiModel.RequestUrlHost);
+
+        context.Get(By.CssSelector("#Category")).GetValue()
+            .ShouldBe(apiModel.Category);
     }
 }
