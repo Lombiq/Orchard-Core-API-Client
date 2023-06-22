@@ -32,10 +32,9 @@
     <Content Include="License.md" Pack="true" PackagePath="" />
     <Content Include="Recipes\Lombiq.OrchardCoreApiClient.Tests.UI.OpenId.recipe.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
     </Content>
-    <None Include="NuGetIcon.png" Pack="true" PackagePath="">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="NuGetIcon.png" Pack="true" PackagePath="" />
     <None Include="Readme.md" />
   </ItemGroup>
 
