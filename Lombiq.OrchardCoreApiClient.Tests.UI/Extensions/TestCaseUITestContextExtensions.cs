@@ -16,6 +16,7 @@ public static class TestCaseUITestContextExtensions
             ClientId = "UITest",
             ClientSecret = "Password",
             DefaultTenantUri = context.Scope.BaseUri,
+            DisableCertificateValidation = true,
         });
 
         const string tenantName = "UITestTenant";
