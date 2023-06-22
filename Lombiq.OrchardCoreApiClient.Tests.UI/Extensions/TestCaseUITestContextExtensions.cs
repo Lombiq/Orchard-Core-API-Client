@@ -11,6 +11,8 @@ namespace Lombiq.OrchardCoreApiClient.Tests.UI.Extensions;
 
 public static class TestCaseUITestContextExtensions
 {
+    // Note that the OrchardCore:OrchardCore_Tenants:TenantRemovalAllowed config is deliberately not set here, because
+    // the parent app needs that to be configured if tenant removal should work.
     public static async Task TestOrchardCoreApiClientBehaviorAsync(
         this UITestContext context,
         string featureProfile = null)
@@ -73,6 +75,8 @@ public static class TestCaseUITestContextExtensions
         await TestTenantCreateAsync(context, apiClient, createApiModel);
         await TestTenantSetupAsync(context, apiClient, createApiModel, setupApiModel);
         await TestTenantEditAsync(context, apiClient, editModel, setupApiModel);
+        await TestTenantDisableAsync(context, apiClient, editModel);
+        await TestTenantRemoveAsync(context, apiClient, editModel);
     }
 
     private static async Task TestTenantCreateAsync(
@@ -116,11 +120,7 @@ public static class TestCaseUITestContextExtensions
 
         context.Missing(By.ClassName("validation-summary-errors"));
 
-        // Intentionally not switching tenants because API requests need to continue to go to the Default tenant.
-        await context.GoToRelativeUrlAsync(createApiModel.RequestUrlPrefix);
-
-        context.Get(By.ClassName("navbar-brand")).Text
-            .ShouldBe(setupApiModel.SiteName);
+        await GoToTenantUrlAndAssertHeaderAsync(context, createApiModel, setupApiModel);
 
         context.Configuration.TestOutputHelper.WriteLine("Setting up the tenant succeeded.");
     }
@@ -132,26 +132,65 @@ public static class TestCaseUITestContextExtensions
         TenantSetupApiModel setupApiModel)
     {
         await apiClient.OrchardCoreApi.EditAsync(editModel);
-
         await GoToTenantEditorAndAssertCommonTenantFieldsAsync(context, editModel);
+        await GoToTenantUrlAndAssertHeaderAsync(context, editModel, setupApiModel);
 
-        await context.GoToRelativeUrlAsync(editModel.RequestUrlPrefix);
-
-        context.Get(By.ClassName("navbar-brand")).Text
-            .ShouldBe(setupApiModel.SiteName);
+        var originalPrefix = editModel.RequestUrlPrefix;
+        var originalHost = editModel.RequestUrlHost;
 
         editModel.RequestUrlPrefix = string.Empty;
         editModel.RequestUrlHost = "https://example.com";
-
         await apiClient.OrchardCoreApi.EditAsync(editModel);
-
         await GoToTenantEditorAndAssertCommonTenantFieldsAsync(context, editModel);
+
+        editModel.RequestUrlPrefix = originalPrefix;
+        editModel.RequestUrlHost = originalHost;
+        await apiClient.OrchardCoreApi.EditAsync(editModel);
+        await GoToTenantEditorAndAssertCommonTenantFieldsAsync(context, editModel);
+        await GoToTenantUrlAndAssertHeaderAsync(context, editModel, setupApiModel);
 
         context.Configuration.TestOutputHelper.WriteLine("Editing the tenant succeeded.");
     }
 
+    private static async Task TestTenantDisableAsync(
+        UITestContext context,
+        ApiClient apiClient,
+        TenantApiModel editModel)
+    {
+        await apiClient.OrchardCoreApi.DisableAsync(editModel.Name);
+        await context.GoToAdminRelativeUrlAsync("/Tenants");
+        var href = context.GetAbsoluteAdminUri($"/OrchardCore.Tenants/Admin/Enable/{editModel.Name}").ToString();
+        context.GetAll(By.LinkText("Enable")).ShouldContain(element => element.GetAttribute("href") == href);
+
+        context.Configuration.TestOutputHelper.WriteLine("Disabling the tenant succeeded.");
+    }
+
+    private static async Task TestTenantRemoveAsync(
+        UITestContext context,
+        ApiClient apiClient,
+        TenantApiModel editModel)
+    {
+        await apiClient.OrchardCoreApi.RemoveAsync(editModel.Name);
+        await context.GoToAdminRelativeUrlAsync("/Tenants", onlyIfNotAlreadyThere: false);
+        context.Missing(By.LinkText(editModel.Name));
+
+        context.Configuration.TestOutputHelper.WriteLine("Removing the tenant succeeded.");
+    }
+
+    private static async Task GoToTenantUrlAndAssertHeaderAsync(
+        UITestContext context,
+        TenantApiModel apiModel,
+        TenantSetupApiModel setupApiModel)
+    {
+        // Intentionally not switching tenants because API requests need to continue to go to the Default tenant.
+        await context.GoToRelativeUrlAsync(apiModel.RequestUrlPrefix, onlyIfNotAlreadyThere: false);
+
+        context.Get(By.ClassName("navbar-brand")).Text
+            .ShouldBe(setupApiModel.SiteName);
+    }
+
     private static Task GoToTenantEditorAsync(UITestContext context, TenantApiModel apiModel) =>
-        context.GoToAdminRelativeUrlAsync("/Tenants/Edit/" + apiModel.Name);
+        context.GoToAdminRelativeUrlAsync("/Tenants/Edit/" + apiModel.Name, onlyIfNotAlreadyThere: false);
 
     private static async Task GoToTenantEditorAndAssertCommonTenantFieldsAsync(UITestContext context, TenantApiModel apiModel)
     {
