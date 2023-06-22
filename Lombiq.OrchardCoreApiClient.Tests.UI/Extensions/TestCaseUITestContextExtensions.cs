@@ -122,7 +122,6 @@ public static class TestCaseUITestContextExtensions
         await context.GoToRelativeUrlAsync(createApiModel.RequestUrlPrefix);
 
         context.Exists(By.LinkText(setupApiModel.SiteName));
-
         context.Missing(By.ClassName("validation-summary-errors"));
 
         await GoToTenantUrlAndAssertHeaderAsync(context, createApiModel, setupApiModel);
