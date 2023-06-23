@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Title>Lombiq API Client for Orchard Core - UI Test Extensions</Title>
+    <Authors>Lombiq Technologies</Authors>
+    <Copyright>Copyright © 2022, Lombiq Technologies Ltd.</Copyright>
+    <Description>Lombiq API Client for Orchard Core - UI Test Extensions: Extensions to aid in UI testing Lombiq API Client for Orchard Core.</Description>
+    <PackageIcon>NuGetIcon.png</PackageIcon>
+    <PackageTags>OrchardCore;Lombiq;Refit;OpenId;ApiClient;UITesting;Testing;Automation</PackageTags>
+    <RepositoryUrl>https://github.com/Lombiq/Orchard-Core-API-Client</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Lombiq/Orchard-Core-API-Client/blob/dev/Lombiq.OrchardCoreApiClient.Tests.UI/Readme.md</PackageProjectUrl>
+    <PackageLicenseFile>License.md</PackageLicenseFile>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(NuGetBuild)' != 'true'">
+    <ProjectReference Include="..\..\..\..\test\Lombiq.UITestingToolbox\Lombiq.Tests.UI\Lombiq.Tests.UI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(NuGetBuild)' == 'true'">
+    <PackageReference Include="Lombiq.Tests.UI" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Recipes\Lombiq.OrchardCoreApiClient.Tests.UI.OpenId.recipe.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="License.md" Pack="true" PackagePath="" />
+    <Content Include="Recipes\Lombiq.OrchardCoreApiClient.Tests.UI.OpenId.recipe.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+    </Content>
+    <None Include="NuGetIcon.png" Pack="true" PackagePath="" />
+    <None Include="Readme.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Lombiq.OrchardCoreApiClient\Lombiq.OrchardCoreApiClient.csproj" />
+  </ItemGroup>
+
+</Project>

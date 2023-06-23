@@ -30,32 +30,32 @@ public static class Program
         var name = "ApiClientTenant" + suffix;
 
         await apiClient.CreateAndSetupTenantAsync(
-                new TenantApiModel
-                {
-                    Description = "Tenant created by API Client",
-                    Name = name,
-                    DatabaseProvider = "Sqlite",
-                    RequestUrlPrefix = "api-client-tenant-" + suffix,
-                    RequestUrlHost = string.Empty,
-                    ConnectionString = string.Empty,
-                    TablePrefix = "apiClientTenant",
-                    RecipeName = "Blog",
-                    Category = "API Client Tenants",
-                },
-                new TenantSetupApiModel
-                {
-                    Name = name,
-                    DatabaseProvider = "Sqlite",
-                    ConnectionString = string.Empty,
-                    RecipeName = "Blog",
-                    UserName = "admin",
-                    Email = "admin@example.com",
-                    Password = "Password1!",
-                    SiteName = "Api Client Tenant Site",
-                    SiteTimeZone = "Europe/Budapest",
-                    TablePrefix = "apiclienttenant" + suffix, // #spell-check-ignore-line
-                }
-            );
+            new TenantApiModel
+            {
+                Description = "Tenant created by API Client",
+                Name = name,
+                DatabaseProvider = "Sqlite",
+                RequestUrlPrefix = "api-client-tenant-" + suffix,
+                RequestUrlHost = string.Empty,
+                ConnectionString = string.Empty,
+                TablePrefix = "apiclienttenant" + suffix, // #spell-check-ignore-line
+                RecipeName = "Blog",
+                Category = "API Client Tenants",
+            },
+            new TenantSetupApiModel
+            {
+                Name = name,
+                DatabaseProvider = "Sqlite",
+                ConnectionString = string.Empty,
+                RecipeName = "Blog",
+                UserName = "admin",
+                Email = "admin@example.com",
+                Password = "Password1!",
+                SiteName = "Api Client Tenant Site",
+                SiteTimeZone = "Europe/Budapest",
+                TablePrefix = "apiclienttenant" + suffix, // #spell-check-ignore-line
+            }
+        );
 
         Console.WriteLine("Creating and setting up the tenant succeeded.");
 
