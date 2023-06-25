@@ -29,8 +29,9 @@ public class TenantSetupApiModel
     public string RecipeName { get; set; }
 
     [Obsolete($"This property relies on a deprecated NuGet package and will be removed in the next major version. " +
-              $"Please use the {nameof(RecipeJson)} property instead and serialize the value yourself in a project " +
-              $"that doesn't use the .NET Standard framework.")]
+              $"See https://github.com/Lombiq/Orchard-Core-API-Client/issues/34. Please use the {nameof(RecipeJson)} " +
+              $"property instead and serialize the value yourself in a project that doesn't use the .NET Standard " +
+              $"framework.")]
     [JsonIgnore]
     public IFormFile Recipe
     {
