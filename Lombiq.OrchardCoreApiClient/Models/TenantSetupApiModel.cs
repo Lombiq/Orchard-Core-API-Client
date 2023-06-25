@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Lombiq.OrchardCoreApiClient.Models;
 
@@ -37,9 +38,8 @@ public class TenantSetupApiModel
         set => JToken.FromObject(value);
     }
 
-#pragma warning disable CS0618 // Use of Obsolete symbol. But only for reference.
-    [JsonProperty(nameof(Recipe))]
-#pragma warning restore CS0618 // Use of Obsolete symbol. But only for reference.
+    [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "The other property will be removed.")]
+    [JsonProperty("Recipe")]
     public JToken RecipeJson { get; set; }
 
     public string SiteTimeZone { get; set; }
