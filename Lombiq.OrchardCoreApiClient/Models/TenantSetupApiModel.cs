@@ -1,4 +1,4 @@
-using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace Lombiq.OrchardCoreApiClient.Models;
@@ -23,6 +23,6 @@ public class TenantSetupApiModel
     [DataType(DataType.Password)]
     public string Password { get; set; }
     public string RecipeName { get; set; }
-    public JToken Recipe { get; set; }
+    public IFormFile Recipe { get; set; }
     public string SiteTimeZone { get; set; }
 }
