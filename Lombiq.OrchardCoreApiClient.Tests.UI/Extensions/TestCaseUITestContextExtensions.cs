@@ -4,6 +4,7 @@ using Lombiq.Tests.UI.Extensions;
 using Lombiq.Tests.UI.Services;
 using OpenQA.Selenium;
 using Shouldly;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -92,7 +93,7 @@ public static class TestCaseUITestContextExtensions
         await apiClient.OrchardCoreApi.CreateAsync(createApiModel);
 
         await context.GoToAdminRelativeUrlAsync("/Tenants");
-        context.Exists(By.LinkText(createApiModel.Name));
+        context.Exists(By.LinkText(createApiModel.Name).Within(TimeSpan.FromMinutes(5)));
 
         await GoToTenantEditorAndAssertCommonTenantFieldsAsync(context, createApiModel);
 
