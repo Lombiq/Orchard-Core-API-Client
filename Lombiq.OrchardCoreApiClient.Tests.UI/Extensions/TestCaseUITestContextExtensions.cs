@@ -92,7 +92,7 @@ public static class TestCaseUITestContextExtensions
     {
         using (var response = await apiClient.OrchardCoreApi.CreateAsync(createApiModel))
         {
-            response.IsSuccessStatusCode.ShouldBeTrue(
+            response.Error.ShouldBeNull(
                 $"Tenant creation failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
                 $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
 
@@ -103,7 +103,7 @@ public static class TestCaseUITestContextExtensions
         var found = false;
         for (int retries = 0; !found && retries < 5; retries++)
         {
-            await context.GoToAdminRelativeUrlAsync("/Tenants");
+            await context.GoToAdminRelativeUrlAsync("/Tenants", onlyIfNotAlreadyThere: false);
             found = context.Exists(By.LinkText(createApiModel.Name).Safely());
         }
 
