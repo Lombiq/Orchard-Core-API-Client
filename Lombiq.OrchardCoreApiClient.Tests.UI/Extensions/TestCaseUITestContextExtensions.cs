@@ -4,7 +4,6 @@ using Lombiq.Tests.UI.Extensions;
 using Lombiq.Tests.UI.Services;
 using OpenQA.Selenium;
 using Shouldly;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -90,10 +89,16 @@ public static class TestCaseUITestContextExtensions
         ApiClient apiClient,
         TenantApiModel createApiModel)
     {
-        await apiClient.OrchardCoreApi.CreateAsync(createApiModel);
+        using (var response = await apiClient.OrchardCoreApi.CreateAsync(createApiModel))
+        {
+            response.IsSuccessStatusCode.ShouldBeTrue(
+                $"Tenant creation failed with status code {response.StatusCode}. Content: {response.Error?.Content}");
+
+            response.Content.ShouldBeEmpty();
+        }
 
         await context.GoToAdminRelativeUrlAsync("/Tenants");
-        context.Exists(By.LinkText(createApiModel.Name).Within(TimeSpan.FromMinutes(5)));
+        context.Exists(By.LinkText(createApiModel.Name));
 
         await GoToTenantEditorAndAssertCommonTenantFieldsAsync(context, createApiModel);
 
