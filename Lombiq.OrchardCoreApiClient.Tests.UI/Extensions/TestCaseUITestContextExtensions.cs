@@ -93,7 +93,8 @@ public static class TestCaseUITestContextExtensions
         using (var response = await apiClient.OrchardCoreApi.CreateAsync(createApiModel))
         {
             response.IsSuccessStatusCode.ShouldBeTrue(
-                $"Tenant creation failed with status code {response.StatusCode}. Content: {response.Error?.Content}");
+                $"Tenant creation failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
+                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
 
             new Uri(response.Content).AbsolutePath.ShouldBe($"/{createApiModel.Name}", StringCompareShould.IgnoreCase);
         }
