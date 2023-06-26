@@ -96,18 +96,13 @@ public static class TestCaseUITestContextExtensions
                 $"Tenant creation failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
                 $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
 
-            new Uri(response.Content).AbsolutePath.ShouldBe($"/{createApiModel.Name}", StringCompareShould.IgnoreCase);
+            var responseUrl = new Uri(response.Content);
+            responseUrl.AbsolutePath.ShouldBe($"/{createApiModel.Name}", StringCompareShould.IgnoreCase);
+            await context.GoToAbsoluteUrlAsync(responseUrl);
         }
 
-        // This is necessary because only on GitHub + Windows it will not find the tenant on the first try.
-        var found = false;
-        for (int retries = 0; !found && retries < 5; retries++)
-        {
-            await context.GoToAdminRelativeUrlAsync("/Tenants", onlyIfNotAlreadyThere: false);
-            found = context.Exists(By.LinkText(createApiModel.Name).Safely());
-        }
-
-        found.ShouldBeTrue($"Couldn't find \"{createApiModel.Name}\" in the Tenants page.");
+        await context.GoToAdminRelativeUrlAsync("/Tenants");
+        context.Exists(By.LinkText(createApiModel.Name));
 
         await GoToTenantEditorAndAssertCommonTenantFieldsAsync(context, createApiModel);
 
