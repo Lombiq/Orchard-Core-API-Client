@@ -4,6 +4,7 @@ using Lombiq.Tests.UI.Extensions;
 using Lombiq.Tests.UI.Services;
 using OpenQA.Selenium;
 using Shouldly;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -94,7 +95,7 @@ public static class TestCaseUITestContextExtensions
             response.IsSuccessStatusCode.ShouldBeTrue(
                 $"Tenant creation failed with status code {response.StatusCode}. Content: {response.Error?.Content}");
 
-            response.Content.ShouldBeEmpty();
+            new Uri(response.Content).AbsolutePath.ShouldBe($"/{createApiModel.Name}", StringCompareShould.IgnoreCase);
         }
 
         // This is necessary because only on GitHub + Windows it will not find the tenant on the first try.
