@@ -96,13 +96,11 @@ public static class TestCaseUITestContextExtensions
                 $"Tenant creation failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
                 $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
 
+            // Check if response URL is valid, and visit it (should be the tenant setup page and not 404 error).
             var responseUrl = new Uri(response.Content);
             responseUrl.AbsolutePath.ShouldBe($"/{createApiModel.Name}", StringCompareShould.IgnoreCase);
             await context.GoToAbsoluteUrlAsync(responseUrl);
         }
-
-        await context.GoToAdminRelativeUrlAsync("/Tenants");
-        context.Exists(By.LinkText(createApiModel.Name));
 
         await GoToTenantEditorAndAssertCommonTenantFieldsAsync(context, createApiModel);
 
