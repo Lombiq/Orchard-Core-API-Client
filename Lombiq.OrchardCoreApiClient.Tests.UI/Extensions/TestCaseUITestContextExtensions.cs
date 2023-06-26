@@ -98,14 +98,14 @@ public static class TestCaseUITestContextExtensions
         }
 
         // This is necessary because only on GitHub + Windows it will not find the tenant on the first try.
-        for (int retries = 0; retries < 5; retries++)
+        var found = false;
+        for (int retries = 0; !found && retries < 5; retries++)
         {
             await context.GoToAdminRelativeUrlAsync("/Tenants");
-
-            if (context.Exists(By.LinkText(createApiModel.Name).Safely())) break;
+            found = context.Exists(By.LinkText(createApiModel.Name).Safely());
         }
 
-        context.Exists(By.LinkText(createApiModel.Name));
+        found.ShouldBeTrue($"Couldn't find \"{createApiModel.Name}\" in the Tenants page.");
 
         await GoToTenantEditorAndAssertCommonTenantFieldsAsync(context, createApiModel);
 
