@@ -85,11 +85,14 @@ public static class TestCaseUITestContextExtensions
             await context.ExecuteRecipeDirectlyAsync(defaultClientRecipe);
 
             // Verify that the recipe has successfully created the application.
+            await context.SignInDirectlyAsync();
             await context.GoToAdminRelativeUrlAsync("/OpenId/Application/Edit/1");
             context.Get(By.Name("ClientId")).GetAttribute("value").ShouldBe(clientId);
         }
-
-        await context.SignInDirectlyAsync();
+        else
+        {
+            await context.SignInDirectlyAsync();
+        }
 
         await TestTenantCreateAsync(context, apiClient, createApiModel);
         await TestTenantSetupAsync(context, apiClient, createApiModel, setupApiModel);
