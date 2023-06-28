@@ -83,6 +83,10 @@ public static class TestCaseUITestContextExtensions
         if (isDefaultClient)
         {
             await context.ExecuteRecipeDirectlyAsync(defaultClientRecipe);
+
+            // Verify that the recipe has successfully created the application.
+            await context.GoToAdminRelativeUrlAsync("/OpenId/Application/Edit/1");
+            context.Get(By.Name("ClientId")).GetAttribute("value").ShouldBe(clientId);
         }
 
         await context.SignInDirectlyAsync();
