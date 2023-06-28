@@ -75,6 +75,7 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
                             ["client_id"] = _apiClientSettings.ClientId,
                             ["client_secret"] = _apiClientSettings.ClientSecret,
                         });
+                tokenResponse.AccessToken = tokenResponse.AccessToken?.Trim();
             }
             catch (Exception exception)
             {
