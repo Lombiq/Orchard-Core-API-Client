@@ -29,8 +29,11 @@ public static class TestCaseUITestContextExtensions
         var isDefaultClient = string.IsNullOrEmpty(clientId);
         if (isDefaultClient)
         {
+            // If the client ID is not set, change both ID and secret to the default.
+#pragma warning disable S1226 // Introduce a new variable instead of reusing the parameter.
             clientId = "UITest";
             clientSecret = "Password";
+#pragma warning restore S1226 // Introduce a new variable instead of reusing the parameter.
         }
 
         var createApiModel = new TenantApiModel
