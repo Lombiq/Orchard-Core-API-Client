@@ -26,7 +26,6 @@ public static class TestCaseUITestContextExtensions
             ? "SqlConnection"
             : "Sqlite";
 
-        const string defaultClientRecipe = "Lombiq.OrchardCoreApiClient.Tests.UI.OpenId";
         var isDefaultClient = string.IsNullOrEmpty(clientId);
         if (isDefaultClient)
         {
@@ -79,6 +78,7 @@ public static class TestCaseUITestContextExtensions
             DisableCertificateValidation = true,
         });
 
+        const string defaultClientRecipe = "Lombiq.OrchardCoreApiClient.Tests.UI.OpenId";
         context.Scope.AtataContext.Log.Info("Executing the default client recipe \"{0}\": {1}", defaultClientRecipe, isDefaultClient);
         if (isDefaultClient)
         {
