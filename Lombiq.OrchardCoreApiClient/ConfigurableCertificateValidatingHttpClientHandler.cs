@@ -31,11 +31,7 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
     public ConfigurableCertificateValidatingHttpClientHandler(ApiClientSettings apiClientSettings)
     {
         _apiClientSettings = apiClientSettings;
-
-        if (_apiClientSettings.DisableCertificateValidation)
-        {
-            ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
-        }
+        ApplyCertificationValidationSetting(this, _apiClientSettings);
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -47,21 +43,7 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
 
         if (_expirationDateUtc < DateTime.UtcNow.AddSeconds(60))
         {
-            using var handler = new HttpClientHandler();
-
-            if (_apiClientSettings.DisableCertificateValidation)
-            {
-                handler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
-                handler.CheckCertificateRevocationList = true;
-            }
-
-            // It's only disabled optionally, like for local testing.
-#pragma warning disable CA5400 // Ensure HttpClient certificate revocation list check is not disabled
-            using var httpClient = new HttpClient(handler)
-            {
-                BaseAddress = _apiClientSettings.DefaultTenantUri,
-            };
-#pragma warning restore CA5400
+            using var httpClient = CreateClient();
 
             Token tokenResponse;
             try
@@ -75,7 +57,6 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
                             ["client_id"] = _apiClientSettings.ClientId,
                             ["client_secret"] = _apiClientSettings.ClientSecret,
                         });
-                tokenResponse.AccessToken = tokenResponse.AccessToken?.Trim();
             }
             catch (Exception exception)
             {
@@ -100,5 +81,30 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
             request.Headers.Authorization.Scheme, _tokenResponse.AccessToken);
 
         return await base.SendAsync(request, cancellationToken);
+    }
+
+    [SuppressMessage(
+        "Reliability",
+        "CA2000:Dispose objects before losing scope",
+        Justification = "Disposed by the HttpClient.")]
+    [SuppressMessage(
+        "Security",
+        "CA5400:HttpClient may be created without enabling CheckCertificateRevocationList",
+        Justification = "It's only disabled optionally, like for local testing.")]
+    public HttpClient CreateClient() =>
+        new(ApplyCertificationValidationSetting(new HttpClientHandler(), _apiClientSettings))
+        {
+            BaseAddress = _apiClientSettings.DefaultTenantUri,
+        };
+
+    public static HttpClientHandler ApplyCertificationValidationSetting(HttpClientHandler handler, ApiClientSettings settings)
+    {
+        if (settings.DisableCertificateValidation)
+        {
+            handler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
+            handler.CheckCertificateRevocationList = true;
+        }
+
+        return handler;
     }
 }
