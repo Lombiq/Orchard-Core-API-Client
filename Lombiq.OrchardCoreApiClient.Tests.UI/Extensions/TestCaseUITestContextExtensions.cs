@@ -26,10 +26,13 @@ public static class TestCaseUITestContextExtensions
             ? "SqlConnection"
             : "Sqlite";
 
-        const string defaultClientId = "UITest";
         const string defaultClientRecipe = "Lombiq.OrchardCoreApiClient.Tests.UI.OpenId";
         var isDefaultClient = string.IsNullOrEmpty(clientId);
-        if (isDefaultClient) clientId = defaultClientId;
+        if (isDefaultClient)
+        {
+            clientId = "UITest";
+            clientSecret = "Password";
+        }
 
         var createApiModel = new TenantApiModel
         {
@@ -71,7 +74,7 @@ public static class TestCaseUITestContextExtensions
         using var apiClient = new ApiClient(new ApiClientSettings
         {
             ClientId = clientId,
-            ClientSecret = clientSecret ?? "Password",
+            ClientSecret = clientSecret,
             DefaultTenantUri = context.Scope.BaseUri,
             DisableCertificateValidation = true,
         });
