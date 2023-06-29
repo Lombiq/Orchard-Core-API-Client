@@ -111,6 +111,7 @@ public static class TestCaseUITestContextExtensions
     {
         using (var response = await apiClient.OrchardCoreApi.CreateAsync(createApiModel))
         {
+            await context.AssertLogsAsync();
             response.Error.ShouldBeNull(
                 $"Tenant creation failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
                 $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
