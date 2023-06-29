@@ -20,7 +20,7 @@ public interface IOrchardCoreApi
     /// <returns>The response of the tenant creation.</returns>
     [Post("/api/tenants/create/")]
     [Headers(AuthorizationBearer)]
-    Task<ApiResponse<string>> CreateAsync([Body] TenantApiModel createTenantParameters);
+    Task<ApiResponse<string>> CreateAsync([Body(buffered: true)] TenantApiModel createTenantParameters);
 
     /// <summary>
     /// Setup the previously created tenant in Orchard Core.
@@ -31,7 +31,7 @@ public interface IOrchardCoreApi
     /// <returns>The response of the tenant setup.</returns>
     [Post("/api/tenants/setup")]
     [Headers(AuthorizationBearer)]
-    Task<string> SetupAsync([Body] TenantSetupApiModel setupTenantParameters);
+    Task<string> SetupAsync([Body(buffered: true)] TenantSetupApiModel setupTenantParameters);
 
     /// <summary>
     /// Edit a previously created tenant in Orchard Core.
@@ -40,7 +40,7 @@ public interface IOrchardCoreApi
     /// <returns>The response of the tenant edit.</returns>
     [Post("/api/tenants/edit")]
     [Headers(AuthorizationBearer)]
-    Task<string> EditAsync([Body] TenantApiModel editTenantParameters);
+    Task<string> EditAsync([Body(buffered: true)] TenantApiModel editTenantParameters);
 
     /// <summary>
     /// Edit a previously created tenant in Orchard Core with additional settings inside
@@ -52,7 +52,7 @@ public interface IOrchardCoreApi
     [Post("/api/tenants/custom-edit")]
     [Headers(AuthorizationBearer)]
     [Obsolete("This shouldn't be here and will be soon removed, see https://github.com/Lombiq/Orchard-Core-API-Client/issues/30.")]
-    Task<string> CustomEditAsync([Body] TenantApiModel editTenantParameters);
+    Task<string> CustomEditAsync([Body(buffered: true)] TenantApiModel editTenantParameters);
 
     /// <summary>
     /// Remove a previously created tenant in Orchard Core.
