@@ -78,7 +78,8 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
         }
 
         request.Headers.Authorization = new AuthenticationHeaderValue(
-            request.Headers.Authorization.Scheme, _tokenResponse.AccessToken);
+            _tokenResponse.TokenType,
+            _tokenResponse.AccessToken);
 
         return await base.SendAsync(request, cancellationToken);
     }
