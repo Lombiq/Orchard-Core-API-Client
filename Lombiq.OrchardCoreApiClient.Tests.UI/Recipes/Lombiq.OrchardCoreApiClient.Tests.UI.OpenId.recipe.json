@@ -38,7 +38,8 @@
       "AllowClientCredentialsFlow": true,
       "AllowAuthorizationCodeFlow": false,
       "AllowRefreshTokenFlow": false,
-      "AllowImplicitFlow": false
+      "AllowImplicitFlow": false,
+      "DisableAccessTokenEncryption": true
     },
     {
       "name": "openidapplication",
