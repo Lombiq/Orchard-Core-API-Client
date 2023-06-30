@@ -18,7 +18,7 @@ public interface IOrchardCoreApi
     /// The necessary parameters to create a tenant: Name, RequestUrlPrefix etc.
     /// </param>
     /// <returns>The response of the tenant creation.</returns>
-    [Post("/api/tenants2/create/")]
+    [Post("/api/tenants/create/")]
     [Headers(AuthorizationBearer)]
     Task<ApiResponse<string>> CreateAsync([Body(buffered: true)] TenantApiModel createTenantParameters);
 
