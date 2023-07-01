@@ -19,26 +19,37 @@
         "OrchardCore.Tenants"
       ]
     },
+    // In this sample we must use "ASP.NET Core Data Protection" access token format (which doesn't use encryption), 
+    // because using "JSON Web Token (JWT)" would cause problems in the GitHub Actions runner for Windows. Specifically
+    // it will throw a SecurityTokenKeyWrapException saying "IDX10659: UnwrapKey failed, exception from cryptographic
+    // operation: Internal.Cryptography.CryptoThrowHelper+WindowsCryptographicException". We have yet to reproduce it
+    // outside of GH. If you do please open an OC issue about it.
     {
       "name": "OpenIdServerSettings",
-      "TestingModeEnabled": false,
-      "AccessTokenFormat": "JsonWebToken",
-      "Authority": "",
-      "SigningCertificateStoreLocation": "",
-      "SigningCertificateStoreName": "",
-      "SigningCertificateThumbprint": "",
-      "EncryptionCertificateStoreLocation": "",
-      "EncryptionCertificateStoreName": "",
-      "EncryptionCertificateThumbprint": "",
+      "AccessTokenFormat": 0,
+      "Authority": null,
+      "DisableAccessTokenEncryption": false,
+      "EncryptionCertificateStoreLocation": null,
+      "EncryptionCertificateStoreName": null,
+      "EncryptionCertificateThumbprint": null,
+      "SigningCertificateStoreLocation": null,
+      "SigningCertificateStoreName": null,
+      "SigningCertificateThumbprint": null,
       "EnableTokenEndpoint": true,
       "EnableAuthorizationEndpoint": false,
       "EnableLogoutEndpoint": false,
       "EnableUserInfoEndpoint": false,
+      "EnableIntrospectionEndpoint": false,
+      "EnableRevocationEndpoint": false,
       "AllowPasswordFlow": false,
       "AllowClientCredentialsFlow": true,
       "AllowAuthorizationCodeFlow": false,
       "AllowRefreshTokenFlow": false,
-      "AllowImplicitFlow": false
+      "AllowHybridFlow": false,
+      "AllowImplicitFlow": false,
+      "DisableRollingRefreshTokens": true,
+      "RequireProofKeyForCodeExchange": false,
+      "UseReferenceAccessTokens": true
     },
     {
       "name": "openidapplication",

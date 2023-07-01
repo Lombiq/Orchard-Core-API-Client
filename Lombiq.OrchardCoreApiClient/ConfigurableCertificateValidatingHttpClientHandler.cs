@@ -14,13 +14,13 @@ using System.Threading.Tasks;
 namespace Lombiq.OrchardCoreApiClient;
 
 [SuppressMessage(
-        "Security",
-        "SCS0004: Certificate Validation has been disabled.",
-        Justification = "It's only disabled optionally, like for local testing.")]
+    "Security",
+    "SCS0004: Certificate Validation has been disabled.",
+    Justification = "It's only disabled optionally, like for local testing.")]
 [SuppressMessage(
-        "Security",
-        "S4830: Enable server certificate validation on this SSL/TLS connection",
-        Justification = "It's only disabled optionally, like for local testing.")]
+    "Security",
+    "S4830: Enable server certificate validation on this SSL/TLS connection",
+    Justification = "It's only disabled optionally, like for local testing.")]
 internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpClientHandler
 {
     private readonly ApiClientSettings _apiClientSettings;
@@ -28,14 +28,10 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
     private DateTime _expirationDateUtc = DateTime.MinValue;
     private Token _tokenResponse;
 
-    public ConfigurableCertificateValidatingHttpClientHandler(ApiClientSettings apiClientSettings)
+    private ConfigurableCertificateValidatingHttpClientHandler(ApiClientSettings apiClientSettings)
     {
         _apiClientSettings = apiClientSettings;
-
-        if (_apiClientSettings.DisableCertificateValidation)
-        {
-            ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
-        }
+        ApplyCertificationValidationSetting(this, _apiClientSettings);
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -47,21 +43,7 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
 
         if (_expirationDateUtc < DateTime.UtcNow.AddSeconds(60))
         {
-            using var handler = new HttpClientHandler();
-
-            if (_apiClientSettings.DisableCertificateValidation)
-            {
-                handler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
-                handler.CheckCertificateRevocationList = true;
-            }
-
-            // It's only disabled optionally, like for local testing.
-#pragma warning disable CA5400 // Ensure HttpClient certificate revocation list check is not disabled
-            using var httpClient = new HttpClient(handler)
-            {
-                BaseAddress = _apiClientSettings.DefaultTenantUri,
-            };
-#pragma warning restore CA5400
+            using var httpClient = CreateClient(createBasicHandler: true, _apiClientSettings);
 
             Token tokenResponse;
             try
@@ -96,8 +78,43 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
         }
 
         request.Headers.Authorization = new AuthenticationHeaderValue(
-            request.Headers.Authorization.Scheme, _tokenResponse.AccessToken);
+            _tokenResponse.TokenType,
+            _tokenResponse.AccessToken);
 
         return await base.SendAsync(request, cancellationToken);
+    }
+
+    [SuppressMessage(
+        "Reliability",
+        "CA2000:Dispose objects before losing scope",
+        Justification = "Disposed by the HttpClient.")]
+    [SuppressMessage(
+        "Security",
+        "CA5400:HttpClient may be created without enabling CheckCertificateRevocationList",
+        Justification = "It's only disabled optionally, like for local testing.")]
+    private static HttpClient CreateClient(bool createBasicHandler, ApiClientSettings settings) =>
+        new(ApplyCertificationValidationSetting(
+            createBasicHandler
+                ? new HttpClientHandler()
+                : new ConfigurableCertificateValidatingHttpClientHandler(settings),
+            settings))
+        {
+            BaseAddress = settings.DefaultTenantUri,
+        };
+
+    public static HttpClient CreateClient(ApiClientSettings settings) =>
+        CreateClient(createBasicHandler: false, settings);
+
+    public static HttpClientHandler ApplyCertificationValidationSetting(
+        HttpClientHandler handler,
+        ApiClientSettings settings)
+    {
+        if (settings.DisableCertificateValidation)
+        {
+            handler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
+            handler.CheckCertificateRevocationList = true;
+        }
+
+        return handler;
     }
 }

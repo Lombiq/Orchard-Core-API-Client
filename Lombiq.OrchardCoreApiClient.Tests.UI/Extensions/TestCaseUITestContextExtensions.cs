@@ -4,6 +4,7 @@ using Lombiq.Tests.UI.Extensions;
 using Lombiq.Tests.UI.Services;
 using OpenQA.Selenium;
 using Shouldly;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -24,6 +25,16 @@ public static class TestCaseUITestContextExtensions
         var databaseProvider = context.Configuration.UseSqlServer
             ? "SqlConnection"
             : "Sqlite";
+
+        var isDefaultClient = string.IsNullOrEmpty(clientId);
+        if (isDefaultClient)
+        {
+            // If the client ID is not set, change both ID and secret to the default.
+#pragma warning disable S1226 // Introduce a new variable instead of reusing the parameter.
+            clientId = "UITest";
+            clientSecret = "Password";
+#pragma warning restore S1226 // Introduce a new variable instead of reusing the parameter.
+        }
 
         var createApiModel = new TenantApiModel
         {
@@ -64,18 +75,27 @@ public static class TestCaseUITestContextExtensions
 
         using var apiClient = new ApiClient(new ApiClientSettings
         {
-            ClientId = clientId ?? "UITest",
-            ClientSecret = clientSecret ?? "Password",
+            ClientId = clientId,
+            ClientSecret = clientSecret,
             DefaultTenantUri = context.Scope.BaseUri,
             DisableCertificateValidation = true,
         });
 
-        if (string.IsNullOrEmpty(clientId))
+        const string defaultClientRecipe = "Lombiq.OrchardCoreApiClient.Tests.UI.OpenId";
+        context.Scope.AtataContext.Log.Info("Executing the default client recipe \"{0}\": {1}", defaultClientRecipe, isDefaultClient);
+        if (isDefaultClient)
         {
-            await context.ExecuteRecipeDirectlyAsync("Lombiq.OrchardCoreApiClient.Tests.UI.OpenId");
-        }
+            await context.ExecuteRecipeDirectlyAsync(defaultClientRecipe);
 
-        await context.SignInDirectlyAsync();
+            // Verify that the recipe has successfully created the application.
+            await context.SignInDirectlyAsync();
+            await context.GoToAdminRelativeUrlAsync("/OpenId/Application/Edit/1");
+            context.Get(By.Name("ClientId")).GetAttribute("value").ShouldBe(clientId);
+        }
+        else
+        {
+            await context.SignInDirectlyAsync();
+        }
 
         await TestTenantCreateAsync(context, apiClient, createApiModel);
         await TestTenantSetupAsync(context, apiClient, createApiModel, setupApiModel);
@@ -89,10 +109,18 @@ public static class TestCaseUITestContextExtensions
         ApiClient apiClient,
         TenantApiModel createApiModel)
     {
-        await apiClient.OrchardCoreApi.CreateAsync(createApiModel);
+        using (var response = await apiClient.OrchardCoreApi.CreateAsync(createApiModel))
+        {
+            await context.AssertLogsAsync();
+            response.Error.ShouldBeNull(
+                $"Tenant creation failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
+                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
 
-        await context.GoToAdminRelativeUrlAsync("/Tenants");
-        context.Exists(By.LinkText(createApiModel.Name));
+            // Check if response URL is valid, and visit it (should be the tenant setup page and not 404 error).
+            var responseUrl = new Uri(response.Content);
+            responseUrl.AbsolutePath.ShouldBe($"/{createApiModel.Name}", StringCompareShould.IgnoreCase);
+            await context.GoToAbsoluteUrlAsync(responseUrl);
+        }
 
         await GoToTenantEditorAndAssertCommonTenantFieldsAsync(context, createApiModel);
 
