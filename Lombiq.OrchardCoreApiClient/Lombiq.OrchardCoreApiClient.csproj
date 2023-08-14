@@ -39,7 +39,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(NuGetBuild)' == 'true'">
-    <PackageReference Include="Lombiq.HelpfulLibraries.Refit" Version="6.0.1-alpha.0.gov-15" />
+    <PackageReference Include="Lombiq.HelpfulLibraries.Refit" Version="7.0.0" />
   </ItemGroup>
 
 </Project>
