@@ -1,7 +1,5 @@
-using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
@@ -27,17 +25,6 @@ public class TenantSetupApiModel
     [DataType(DataType.Password)]
     public string Password { get; set; }
     public string RecipeName { get; set; }
-
-    [Obsolete($"This property relies on a deprecated NuGet package and will be removed in the next major version. " +
-              $"See https://github.com/Lombiq/Orchard-Core-API-Client/issues/34. Please use the {nameof(RecipeJson)} " +
-              $"property instead and serialize the value yourself in a project that doesn't use the .NET Standard " +
-              $"framework.")]
-    [JsonIgnore]
-    public IFormFile Recipe
-    {
-        get => RecipeJson.ToObject<IFormFile>();
-        set => JToken.FromObject(value);
-    }
 
     [SuppressMessage("Maintainability", "CA1507:Use nameof to express symbol names", Justification = "The other property will be removed.")]
     [JsonProperty("Recipe")]
