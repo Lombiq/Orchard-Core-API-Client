@@ -24,9 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="NodaTime" Version="3.1.9" />
   </ItemGroup>
 
@@ -39,7 +37,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(NuGetBuild)' == 'true'">
-    <PackageReference Include="Lombiq.HelpfulLibraries.Refit" Version="7.0.0" />
+    <PackageReference Include="Lombiq.HelpfulLibraries.Refit" Version="7.0.1-alpha.9.osoe-682" />
   </ItemGroup>
 
 </Project>
