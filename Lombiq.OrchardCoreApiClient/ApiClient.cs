@@ -1,18 +1,32 @@
+using Lombiq.HelpfulLibraries.Refit.Helpers;
 using Lombiq.OrchardCoreApiClient.Constants;
 using Lombiq.OrchardCoreApiClient.Exceptions;
 using Lombiq.OrchardCoreApiClient.Interfaces;
 using Lombiq.OrchardCoreApiClient.Models;
 using Refit;
+using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Lombiq.OrchardCoreApiClient;
 
-public class ApiClient : ApiClientBase<IOrchardCoreApi>
+public class ApiClient<TApi> : IDisposable
+    where TApi : IOrchardCoreApi
 {
-    public ApiClient(ApiClientSettings apiClientSettings)
-        : base(apiClientSettings)
-    {
-    }
+    private readonly Lazy<TApi> _lazyOrchardCoreApi;
+
+    private HttpClient _httpClient;
+
+    public TApi OrchardCoreApi => _lazyOrchardCoreApi.Value;
+
+    public ApiClient(ApiClientSettings apiClientSettings) =>
+        _lazyOrchardCoreApi = new(() =>
+        {
+            _httpClient = ConfigurableCertificateValidatingHttpClientHandler.CreateClient(apiClientSettings);
+
+            // We use Newtonsoft Json.NET because Orchard Core uses it too, so the models will behave the same.
+            return RefitHelper.WithNewtonsoftJson<TApi>(_httpClient);
+        });
 
     public async Task CreateAndSetupTenantAsync(
         TenantApiModel createApiViewModel,
@@ -42,6 +56,21 @@ public class ApiClient : ApiClientBase<IOrchardCoreApi>
         catch (ApiException ex)
         {
             throw new ApiClientException("Tenant setup failed.", ex);
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_lazyOrchardCoreApi.IsValueCreated && _httpClient != null)
+        {
+            _httpClient.Dispose();
+            _httpClient = null;
         }
     }
 }
