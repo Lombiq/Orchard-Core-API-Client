@@ -25,6 +25,19 @@ If you want to set up the OpenId features without the recipe, you need to enable
 
 For testing, run your Orchard Core app first, then `Lombiq.OrchardCoreApiClient.Tester`. You may need to edit the [_Program.cs_](Lombiq.OrchardCoreApiClient.Tester/Program.cs) according to your OpenID Application's settings (`ClientId`, `ClientSecret`, and `DefaultTenantUri`) and then run the console application.
 
+### Use your own API endpoints
+
+You can add your own API endpoints by creating a new interface that's inherited from `IOrchardCoreApi` and add your own methods. For example, you can create a new interface called `IOrchardCoreApiExtended` and add a new method to it:
+
+```csharp
+public interface IOrchardCoreApiExtended : IOrchardCoreApi
+{
+    [Post("/api/my-custom-endpoint")]
+    [Headers(AuthorizationBearer)]
+    Task<string> GetMyCustomEndpointAsync();
+}
+```
+
 ## Recipes
 
 Lombiq OrchardCore API Client OpenId - Recipe for enabling the Tenants and OpenId features and setting it up for the console tester application. To use this recipe, enable the Deployment feature and import this as a deployment package.
