@@ -19,7 +19,7 @@ public static class Program
     public static async Task Main(string[] arguments)
     {
         var port = int.TryParse(arguments.FirstOrDefault(), out var customPort) ? customPort : 44335;
-        using var apiClient = new ApiClient<IOrchardCoreApi>(new ApiClientSettings
+        using var apiClient = new OrchardCoreApiClient(new ApiClientSettings
         {
             ClientId = ClientId,
             ClientSecret = ClientSecret,

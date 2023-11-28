@@ -1,5 +1,4 @@
 using Atata;
-using Lombiq.OrchardCoreApiClient.Interfaces;
 using Lombiq.OrchardCoreApiClient.Models;
 using Lombiq.Tests.UI.Extensions;
 using Lombiq.Tests.UI.Services;
@@ -74,7 +73,7 @@ public static class TestCaseUITestContextExtensions
             Category = "UI Test Tenants - Edited",
         };
 
-        using var apiClient = new ApiClient<IOrchardCoreApi>(new ApiClientSettings
+        using var apiClient = new OrchardCoreApiClient(new ApiClientSettings
         {
             ClientId = clientId,
             ClientSecret = clientSecret,
@@ -107,7 +106,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantCreateAsync(
         UITestContext context,
-        ApiClient<IOrchardCoreApi> apiClient,
+        OrchardCoreApiClient apiClient,
         TenantApiModel createApiModel)
     {
         using (var response = await apiClient.OrchardCoreApi.CreateAsync(createApiModel))
@@ -142,7 +141,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantSetupAsync(
         UITestContext context,
-        ApiClient<IOrchardCoreApi> apiClient,
+        OrchardCoreApiClient apiClient,
         TenantApiModel createApiModel,
         TenantSetupApiModel setupApiModel)
     {
@@ -160,7 +159,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantEditAsync(
         UITestContext context,
-        ApiClient<IOrchardCoreApi> apiClient,
+        OrchardCoreApiClient apiClient,
         TenantApiModel editModel,
         TenantSetupApiModel setupApiModel)
     {
@@ -187,7 +186,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantDisableAsync(
         UITestContext context,
-        ApiClient<IOrchardCoreApi> apiClient,
+        OrchardCoreApiClient apiClient,
         TenantApiModel editModel)
     {
         await apiClient.OrchardCoreApi.DisableAsync(editModel.Name);
@@ -200,7 +199,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantRemoveAsync(
         UITestContext context,
-        ApiClient<IOrchardCoreApi> apiClient,
+        OrchardCoreApiClient apiClient,
         TenantApiModel editModel)
     {
         await apiClient.OrchardCoreApi.RemoveAsync(editModel.Name);
