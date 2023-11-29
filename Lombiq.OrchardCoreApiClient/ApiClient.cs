@@ -10,6 +10,14 @@ using System.Threading.Tasks;
 
 namespace Lombiq.OrchardCoreApiClient;
 
+public class ApiClient : ApiClient<IOrchardCoreApi>
+{
+    public ApiClient(ApiClientSettings apiClientSettings)
+        : base(apiClientSettings)
+    {
+    }
+}
+
 public class ApiClient<TApi> : IDisposable
     where TApi : IOrchardCoreApi
 {

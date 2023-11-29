@@ -73,7 +73,7 @@ public static class TestCaseUITestContextExtensions
             Category = "UI Test Tenants - Edited",
         };
 
-        using var apiClient = new OrchardCoreApiClient(new ApiClientSettings
+        using var apiClient = new ApiClient(new ApiClientSettings
         {
             ClientId = clientId,
             ClientSecret = clientSecret,
@@ -106,7 +106,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantCreateAsync(
         UITestContext context,
-        OrchardCoreApiClient apiClient,
+        ApiClient apiClient,
         TenantApiModel createApiModel)
     {
         using (var response = await apiClient.OrchardCoreApi.CreateAsync(createApiModel))
@@ -141,7 +141,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantSetupAsync(
         UITestContext context,
-        OrchardCoreApiClient apiClient,
+        ApiClient apiClient,
         TenantApiModel createApiModel,
         TenantSetupApiModel setupApiModel)
     {
@@ -159,7 +159,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantEditAsync(
         UITestContext context,
-        OrchardCoreApiClient apiClient,
+        ApiClient apiClient,
         TenantApiModel editModel,
         TenantSetupApiModel setupApiModel)
     {
@@ -186,7 +186,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantDisableAsync(
         UITestContext context,
-        OrchardCoreApiClient apiClient,
+        ApiClient apiClient,
         TenantApiModel editModel)
     {
         await apiClient.OrchardCoreApi.DisableAsync(editModel.Name);
@@ -199,7 +199,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantRemoveAsync(
         UITestContext context,
-        OrchardCoreApiClient apiClient,
+        ApiClient apiClient,
         TenantApiModel editModel)
     {
         await apiClient.OrchardCoreApi.RemoveAsync(editModel.Name);
