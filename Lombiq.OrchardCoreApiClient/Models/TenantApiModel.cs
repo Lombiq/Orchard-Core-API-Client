@@ -17,5 +17,4 @@ public class TenantApiModel
     public string RecipeName { get; set; }
     public IEnumerable<string> FeatureProfiles { get; set; }
     public string Category { get; set; }
-    public IDictionary<string, string> CustomSettings { get; } = new Dictionary<string, string>();
 }

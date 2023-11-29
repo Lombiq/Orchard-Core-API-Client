@@ -1,6 +1,5 @@
 using Lombiq.OrchardCoreApiClient.Models;
 using Refit;
-using System;
 using System.Threading.Tasks;
 using static Lombiq.OrchardCoreApiClient.Constants.CommonHeaders;
 
@@ -41,18 +40,6 @@ public interface IOrchardCoreApi
     [Post("/api/tenants/edit")]
     [Headers(AuthorizationBearer)]
     Task<string> EditAsync([Body(buffered: true)] TenantApiModel editTenantParameters);
-
-    /// <summary>
-    /// Edit a previously created tenant in Orchard Core with additional settings inside
-    /// <see cref="TenantApiModel.CustomSettings"/>. This endpoint is not implemented, implement on your own.
-    /// </summary>
-    /// <param name="editTenantParameters">The <see cref="TenantApiModel.CustomSettings"/> property in the
-    /// <see cref="TenantApiModel"/> is the additional property that is not processed in <see cref="EditAsync"/>.</param>
-    /// <returns>The response of the custom tenant edit.</returns>
-    [Post("/api/tenants/custom-edit")]
-    [Headers(AuthorizationBearer)]
-    [Obsolete("This shouldn't be here and will be soon removed, see https://github.com/Lombiq/Orchard-Core-API-Client/issues/30.")]
-    Task<string> CustomEditAsync([Body(buffered: true)] TenantApiModel editTenantParameters);
 
     /// <summary>
     /// Remove a previously created tenant in Orchard Core.

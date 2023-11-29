@@ -10,13 +10,22 @@ using System.Threading.Tasks;
 
 namespace Lombiq.OrchardCoreApiClient;
 
-public class ApiClient : IDisposable
+public class ApiClient : ApiClient<IOrchardCoreApi>
 {
-    private readonly Lazy<IOrchardCoreApi> _lazyOrchardCoreApi;
+    public ApiClient(ApiClientSettings apiClientSettings)
+        : base(apiClientSettings)
+    {
+    }
+}
+
+public class ApiClient<TApi> : IDisposable
+    where TApi : IOrchardCoreApi
+{
+    private readonly Lazy<TApi> _lazyOrchardCoreApi;
 
     private HttpClient _httpClient;
 
-    public IOrchardCoreApi OrchardCoreApi => _lazyOrchardCoreApi.Value;
+    public TApi OrchardCoreApi => _lazyOrchardCoreApi.Value;
 
     public ApiClient(ApiClientSettings apiClientSettings) =>
         _lazyOrchardCoreApi = new(() =>
@@ -24,7 +33,7 @@ public class ApiClient : IDisposable
             _httpClient = ConfigurableCertificateValidatingHttpClientHandler.CreateClient(apiClientSettings);
 
             // We use Newtonsoft Json.NET because Orchard Core uses it too, so the models will behave the same.
-            return RefitHelper.WithNewtonsoftJson<IOrchardCoreApi>(_httpClient);
+            return RefitHelper.WithNewtonsoftJson<TApi>(_httpClient);
         });
 
     public async Task CreateAndSetupTenantAsync(
