@@ -1,4 +1,3 @@
-using Lombiq.OrchardCoreApiClient.Interfaces;
 using Lombiq.OrchardCoreApiClient.Models;
 using System;
 using System.Diagnostics.CodeAnalysis;
