@@ -6,7 +6,6 @@ using Lombiq.OrchardCoreApiClient.Models;
 using Refit;
 using Polly;
 using System;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Polly.Retry;
@@ -41,13 +40,16 @@ public class ApiClient<TApi> : IDisposable
             // We use Newtonsoft Json.NET because Orchard Core uses it too, so the models will behave the same.
             return RefitHelper.WithNewtonsoftJson<TApi>(_httpClient);
         });
+
+        RetryPolicy = InitRetryPolicy();
     }
 
-    public void SetRetryPolicy(Func<Exception, TimeSpan, int, Context, Task> onRetryAsync = null)
+    public AsyncRetryPolicy InitRetryPolicy(Func<Exception, TimeSpan, int, Context, Task> onRetryAsync = null)
     {
         // Define a basic retry policy: retry up to 3 times with a 2-second delay between retries
-        RetryPolicy = Policy
-            .Handle<ApiException>(exception => exception.StatusCode == HttpStatusCode.RequestTimeout)
+        return Policy
+            .Handle<ApiException>()
+            .Or<ApiClientException>()
             .Or<HttpRequestException>()
             .WaitAndRetryAsync(
                 3,
