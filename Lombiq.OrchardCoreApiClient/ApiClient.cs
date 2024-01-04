@@ -4,9 +4,12 @@ using Lombiq.OrchardCoreApiClient.Exceptions;
 using Lombiq.OrchardCoreApiClient.Interfaces;
 using Lombiq.OrchardCoreApiClient.Models;
 using Refit;
+using Polly;
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Polly.Retry;
 
 namespace Lombiq.OrchardCoreApiClient;
 
@@ -25,9 +28,12 @@ public class ApiClient<TApi> : IDisposable
 
     private HttpClient _httpClient;
 
+    public AsyncRetryPolicy RetryPolicy { get; set; }
+
     public TApi OrchardCoreApi => _lazyOrchardCoreApi.Value;
 
-    public ApiClient(ApiClientSettings apiClientSettings) =>
+    public ApiClient(ApiClientSettings apiClientSettings)
+    {
         _lazyOrchardCoreApi = new(() =>
         {
             _httpClient = ConfigurableCertificateValidatingHttpClientHandler.CreateClient(apiClientSettings);
@@ -35,6 +41,19 @@ public class ApiClient<TApi> : IDisposable
             // We use Newtonsoft Json.NET because Orchard Core uses it too, so the models will behave the same.
             return RefitHelper.WithNewtonsoftJson<TApi>(_httpClient);
         });
+    }
+
+    public void SetRetryPolicy(Func<Exception, TimeSpan, int, Context, Task> onRetryAsync = null)
+    {
+        // Define a basic retry policy: retry up to 3 times with a 2-second delay between retries
+        RetryPolicy = Policy
+            .Handle<ApiException>(exception => exception.StatusCode == HttpStatusCode.RequestTimeout)
+            .Or<HttpRequestException>()
+            .WaitAndRetryAsync(
+                3,
+                _ => TimeSpan.FromSeconds(2),
+                onRetryAsync ?? ((_, _, _, _) => Task.CompletedTask));
+    }
 
     public async Task CreateAndSetupTenantAsync(
         TenantApiModel createApiViewModel,
