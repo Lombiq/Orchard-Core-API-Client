@@ -3,12 +3,12 @@ using Lombiq.OrchardCoreApiClient.Constants;
 using Lombiq.OrchardCoreApiClient.Exceptions;
 using Lombiq.OrchardCoreApiClient.Interfaces;
 using Lombiq.OrchardCoreApiClient.Models;
-using Refit;
 using Polly;
+using Polly.Retry;
+using Refit;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Polly.Retry;
 
 namespace Lombiq.OrchardCoreApiClient;
 
@@ -46,7 +46,7 @@ public class ApiClient<TApi> : IDisposable
 
     public AsyncRetryPolicy InitRetryPolicy(
         int retryCount = 3,
-        Func<int,TimeSpan> sleepDurationProvider = null,
+        Func<int, TimeSpan> sleepDurationProvider = null,
         Func<Exception, TimeSpan, int, Context, Task> onRetryAsync = null) =>
         Policy
             .Handle<ApiException>()
