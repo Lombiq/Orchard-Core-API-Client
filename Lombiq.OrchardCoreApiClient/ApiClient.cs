@@ -44,18 +44,18 @@ public class ApiClient<TApi> : IDisposable
         RetryPolicy = InitRetryPolicy();
     }
 
-    public AsyncRetryPolicy InitRetryPolicy(Func<Exception, TimeSpan, int, Context, Task> onRetryAsync = null)
-    {
-        // Define a basic retry policy: retry up to 3 times with a 2-second delay between retries
-        return Policy
+    public AsyncRetryPolicy InitRetryPolicy(
+        int retryCount = 3,
+        Func<int,TimeSpan> sleepDurationProvider = null,
+        Func<Exception, TimeSpan, int, Context, Task> onRetryAsync = null) =>
+        Policy
             .Handle<ApiException>()
             .Or<ApiClientException>()
             .Or<HttpRequestException>()
             .WaitAndRetryAsync(
-                3,
-                _ => TimeSpan.FromSeconds(2),
+                retryCount,
+                sleepDurationProvider ?? (_ => TimeSpan.FromSeconds(2)),
                 onRetryAsync ?? ((_, _, _, _) => Task.CompletedTask));
-    }
 
     public async Task CreateAndSetupTenantAsync(
         TenantApiModel createApiViewModel,
