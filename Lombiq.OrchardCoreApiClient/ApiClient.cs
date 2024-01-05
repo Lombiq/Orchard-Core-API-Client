@@ -57,6 +57,21 @@ public class ApiClient<TApi> : IDisposable
                 sleepDurationProvider ?? (_ => TimeSpan.FromSeconds(2)),
                 onRetryAsync ?? ((_, _, _, _) => Task.CompletedTask));
 
+    public async Task<TResult> ExecuteWithRetryPolicy<TResult>(
+        Func<Task<TResult>> executeAction,
+        Func<ApiClientException, Task> catchAction)
+    {
+        try
+        {
+            return await RetryPolicy.ExecuteAsync(executeAction);
+        }
+        catch (ApiClientException ex)
+        {
+            await catchAction(ex);
+            throw;
+        }
+    }
+
     public async Task CreateAndSetupTenantAsync(
         TenantApiModel createApiViewModel,
         TenantSetupApiModel setupApiViewModel)
