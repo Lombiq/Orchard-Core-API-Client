@@ -18,7 +18,7 @@ public interface IOrchardCoreApi
     /// </param>
     /// <returns>The response of the tenant creation.</returns>
     [Post("/api/tenants/create/")]
-    [Headers(AuthorizationBearer)]
+    [Headers(AuthorizationBearer, RequestedWithXmlHttpRequest)]
     Task<ApiResponse<string>> CreateAsync([Body(buffered: true)] TenantApiModel createTenantParameters);
 
     /// <summary>
@@ -29,8 +29,8 @@ public interface IOrchardCoreApi
     /// </param>
     /// <returns>The response of the tenant setup.</returns>
     [Post("/api/tenants/setup")]
-    [Headers(AuthorizationBearer)]
-    Task<string> SetupAsync([Body(buffered: true)] TenantSetupApiModel setupTenantParameters);
+    [Headers(AuthorizationBearer, RequestedWithXmlHttpRequest)]
+    Task<ApiResponse<string>> SetupAsync([Body(buffered: true)] TenantSetupApiModel setupTenantParameters);
 
     /// <summary>
     /// Edit a previously created tenant in Orchard Core.
@@ -38,8 +38,8 @@ public interface IOrchardCoreApi
     /// <param name="editTenantParameters">The necessary parameter to edit a tenant: Name.</param>
     /// <returns>The response of the tenant edit.</returns>
     [Post("/api/tenants/edit")]
-    [Headers(AuthorizationBearer)]
-    Task<string> EditAsync([Body(buffered: true)] TenantApiModel editTenantParameters);
+    [Headers(AuthorizationBearer, RequestedWithXmlHttpRequest)]
+    Task<ApiResponse<string>> EditAsync([Body(buffered: true)] TenantApiModel editTenantParameters);
 
     /// <summary>
     /// Remove a previously created tenant in Orchard Core.
@@ -47,8 +47,8 @@ public interface IOrchardCoreApi
     /// <param name="tenantName">The necessary parameter to remove a tenant.</param>
     /// <returns>The response of the tenant removal.</returns>
     [Post("/api/tenants/remove/{tenantName}")]
-    [Headers(AuthorizationBearer)]
-    Task<string> RemoveAsync(string tenantName);
+    [Headers(AuthorizationBearer, RequestedWithXmlHttpRequest)]
+    Task<ApiResponse<string>> RemoveAsync(string tenantName);
 
     /// <summary>
     /// Disable a previously created tenant in Orchard Core.
@@ -56,8 +56,8 @@ public interface IOrchardCoreApi
     /// <param name="tenantName">The necessary parameter to disable a tenant.</param>
     /// <returns>The response of the tenant disable.</returns>
     [Post("/api/tenants/disable/{tenantName}")]
-    [Headers(AuthorizationBearer)]
-    Task<string> DisableAsync(string tenantName);
+    [Headers(AuthorizationBearer, RequestedWithXmlHttpRequest)]
+    Task<ApiResponse<string>> DisableAsync(string tenantName);
 
     /// <summary>
     /// Enable a previously disabled tenant in Orchard Core.
@@ -65,6 +65,6 @@ public interface IOrchardCoreApi
     /// <param name="tenantName">The necessary parameter to enable a tenant.</param>
     /// <returns>The response of the tenant enable.</returns>
     [Post("/api/tenants/enable/{tenantName}")]
-    [Headers(AuthorizationBearer)]
-    Task<string> EnableAsync(string tenantName);
+    [Headers(AuthorizationBearer, RequestedWithXmlHttpRequest)]
+    Task<ApiResponse<string>> EnableAsync(string tenantName);
 }
