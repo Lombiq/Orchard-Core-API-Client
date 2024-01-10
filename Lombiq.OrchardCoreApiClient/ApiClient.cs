@@ -68,6 +68,8 @@ public class ApiClient<TApi> : IDisposable
         catch (ApiClientException ex)
         {
             await catchAction(ex);
+
+            // Throw the exception again so the caller can handle it as well.
             throw;
         }
     }
