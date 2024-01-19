@@ -1,6 +1,5 @@
 using Lombiq.OrchardCoreApiClient.Models;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,10 +10,6 @@ public static class Program
     private const string ClientId = "Console";
     private const string ClientSecret = "Password";
 
-    [SuppressMessage(
-        "Design",
-        "CA1303:Do not pass literals as localized parameters",
-        Justification = "It is not a localization issue")]
     public static async Task Main(string[] arguments)
     {
         var port = int.TryParse(arguments.FirstOrDefault(), out var customPort) ? customPort : 44335;
