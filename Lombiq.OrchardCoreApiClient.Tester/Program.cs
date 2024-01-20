@@ -52,7 +52,10 @@ public static class Program
             }
         );
 
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+        // CA1303 is a localization warning. We don't need that in Program.cs
         Console.WriteLine("Creating and setting up the tenant succeeded.");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
 
         var editModel = new TenantApiModel
         {
@@ -66,6 +69,9 @@ public static class Program
         // Requires Orchard Core 1.6.0 or newer, on a 1.5.0 server this returns a 404 error.
         await apiClient.OrchardCoreApi.EditAsync(editModel);
 
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+        // CA1303 is a localization warning. We don't need that in Program.cs
         Console.WriteLine("Editing the tenant succeeded.");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
     }
 }
