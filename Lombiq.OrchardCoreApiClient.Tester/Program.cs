@@ -58,6 +58,7 @@ public static class Program
         );
 
         Console.WriteLine("Creating and setting up the tenant succeeded.");
+
         var editModel = new TenantApiModel
         {
             Description = "Tenant edited by API Client",
