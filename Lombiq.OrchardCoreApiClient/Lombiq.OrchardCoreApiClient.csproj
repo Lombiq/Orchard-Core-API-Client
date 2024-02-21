@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="NodaTime" Version="3.1.9" />
+    <PackageReference Include="NodaTime" Version="3.1.10" />
     <PackageReference Include="Polly" Version="8.2.0" />
   </ItemGroup>
 
@@ -38,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(NuGetBuild)' == 'true'">
-    <PackageReference Include="Lombiq.HelpfulLibraries.Refit" Version="8.0.3-alpha.0.lmbq-249" />
+    <PackageReference Include="Lombiq.HelpfulLibraries.Refit" Version="8.1.1-alpha.7.osoe-751" />
   </ItemGroup>
 
 </Project>
