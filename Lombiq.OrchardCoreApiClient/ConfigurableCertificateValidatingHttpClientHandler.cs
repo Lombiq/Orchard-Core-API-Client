@@ -1,7 +1,7 @@
-using Lombiq.HelpfulLibraries.Refit.Helpers;
 using Lombiq.OrchardCoreApiClient.Exceptions;
 using Lombiq.OrchardCoreApiClient.Interfaces;
 using Lombiq.OrchardCoreApiClient.Models;
+using Refit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -48,8 +48,8 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
             Token tokenResponse;
             try
             {
-                tokenResponse = await RefitHelper
-                    .WithNewtonsoftJson<IOrchardCoreAuthorizationApi>(httpClient)
+                tokenResponse = await RestService
+                    .For<IOrchardCoreAuthorizationApi>(httpClient)
                     .TokenAsync(
                         new Dictionary<string, string>
                         {
