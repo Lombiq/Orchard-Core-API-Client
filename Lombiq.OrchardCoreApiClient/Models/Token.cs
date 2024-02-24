@@ -1,18 +1,18 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Lombiq.OrchardCoreApiClient.Models;
 
 public class Token
 {
-    [JsonProperty("token_type")]
+    [JsonPropertyName("token_type")]
     public string TokenType { get; set; }
 
-    [JsonProperty("access_token")]
+    [JsonPropertyName("access_token")]
     public string AccessToken { get; set; }
 
-    [JsonProperty("error")]
+    [JsonPropertyName("error")]
     public string Error { get; set; }
 
-    [JsonProperty("expires_in")]
+    [JsonPropertyName("expires_in")]
     public string ExpiresIn { get; set; }
 }
