@@ -191,7 +191,7 @@ public static class TestCaseUITestContextExtensions
     {
         await apiClient.OrchardCoreApi.DisableAsync(editModel.Name);
         await context.GoToAdminRelativeUrlAsync("/Tenants");
-        var href = context.GetAbsoluteAdminUri($"/OrchardCore.Tenants/Admin/Enable/{editModel.Name}").ToString();
+        var href = context.GetAbsoluteAdminUri($"/Admin/Tenants/Enable/{editModel.Name}").ToString();
         context.GetAll(By.LinkText("Enable")).ShouldContain(element => element.GetAttribute("href") == href);
 
         context.Configuration.TestOutputHelper.WriteLine("Disabling the tenant succeeded.");
