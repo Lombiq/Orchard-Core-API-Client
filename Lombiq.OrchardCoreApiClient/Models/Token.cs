@@ -14,5 +14,5 @@ public class Token
     public string Error { get; set; }
 
     [JsonPropertyName("expires_in")]
-    public string ExpiresIn { get; set; }
+    public int ExpiresIn { get; set; }
 }

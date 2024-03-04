@@ -71,8 +71,7 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
                     $"API client setup failed. An error occurred while retrieving an access token: {error}");
             }
 
-            int tokenExpiration = int.Parse(tokenResponse.ExpiresIn, CultureInfo.InvariantCulture);
-            _expirationDateUtc = DateTime.UtcNow.AddSeconds(tokenExpiration);
+            _expirationDateUtc = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
 
             _tokenResponse = tokenResponse;
         }
