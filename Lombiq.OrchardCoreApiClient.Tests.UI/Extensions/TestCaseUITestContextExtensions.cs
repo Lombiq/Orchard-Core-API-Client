@@ -83,7 +83,7 @@ public static class TestCaseUITestContextExtensions
         });
 
         const string defaultClientRecipe = "Lombiq.OrchardCoreApiClient.Tests.UI.OpenId";
-        context.Scope.AtataContext.Log.Info("Executing the default client recipe \"{0}\": {1}", defaultClientRecipe, isDefaultClient);
+        context.Scope.AtataContext.Log.Info($"Executing the default client recipe \"{defaultClientRecipe}\": {isDefaultClient}");
         if (isDefaultClient)
         {
             await context.ExecuteRecipeDirectlyAsync(defaultClientRecipe);
