@@ -1,5 +1,4 @@
 using Atata;
-using FluentAssertions;
 using Lombiq.OrchardCoreApiClient.Models;
 using Lombiq.Tests.UI.Extensions;
 using Lombiq.Tests.UI.Services;
