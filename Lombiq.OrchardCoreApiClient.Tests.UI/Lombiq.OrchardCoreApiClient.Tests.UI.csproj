@@ -13,7 +13,7 @@
     <PackageTags>OrchardCore;Lombiq;Refit;OpenId;ApiClient;UITesting;Testing;Automation</PackageTags>
     <RepositoryUrl>https://github.com/Lombiq/Orchard-Core-API-Client</RepositoryUrl>
     <PackageProjectUrl>https://github.com/Lombiq/Orchard-Core-API-Client/blob/dev/Lombiq.OrchardCoreApiClient.Tests.UI/Readme.md</PackageProjectUrl>
-    <PackageLicenseFile>License.md</PackageLicenseFile>
+    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(NuGetBuild)' != 'true'">
