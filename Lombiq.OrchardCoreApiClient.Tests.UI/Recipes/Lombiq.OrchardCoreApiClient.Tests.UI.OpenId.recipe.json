@@ -19,14 +19,14 @@
         "OrchardCore.Tenants"
       ]
     },
-    // In this sample we must use "ASP.NET Core Data Protection" access token format (which doesn't use encryption), 
+    // In this sample we must use "ASP.NET Core Data Protection" access token format (which doesn't use encryption),
     // because using "JSON Web Token (JWT)" would cause problems in the GitHub Actions runner for Windows. Specifically
     // it will throw a SecurityTokenKeyWrapException saying "IDX10659: UnwrapKey failed, exception from cryptographic
     // operation: Internal.Cryptography.CryptoThrowHelper+WindowsCryptographicException". We have yet to reproduce it
     // outside of GH. If you do please open an OC issue about it.
     {
       "name": "OpenIdServerSettings",
-      "AccessTokenFormat": 0,
+      "AccessTokenFormat": "DataProtection",
       "Authority": null,
       "DisableAccessTokenEncryption": false,
       "EncryptionCertificateStoreLocation": null,
