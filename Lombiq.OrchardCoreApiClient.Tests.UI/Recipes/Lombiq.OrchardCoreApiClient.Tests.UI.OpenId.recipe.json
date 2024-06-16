@@ -26,7 +26,7 @@
     // outside of GH. If you do please open an OC issue about it.
     {
       "name": "OpenIdServerSettings",
-      "AccessTokenFormat": "DataProtection",
+      "AccessTokenFormat": 0,
       "Authority": null,
       "DisableAccessTokenEncryption": false,
       "EncryptionCertificateStoreLocation": null,
