@@ -2,10 +2,15 @@ using Atata;
 using Lombiq.OrchardCoreApiClient.Models;
 using Lombiq.Tests.UI.Extensions;
 using Lombiq.Tests.UI.Services;
+using Newtonsoft.Json;
 using OpenQA.Selenium;
+using OrchardCore.Autoroute.Models;
+using OrchardCore.ContentManagement;
+using OrchardCore.Taxonomies.Models;
 using Shouldly;
 using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Lombiq.OrchardCoreApiClient.Tests.UI.Extensions;
@@ -102,6 +107,21 @@ public static class TestCaseUITestContextExtensions
         await TestTenantEditAsync(context, apiClient, editModel, setupApiModel);
         await TestTenantDisableAsync(context, apiClient, editModel);
         await TestTenantRemoveAsync(context, apiClient, editModel);
+
+        var taxonomy = new ContentItem
+        {
+            ContentType = "Taxonomy",
+            DisplayText = "Taxonomy created by UI test",
+        };
+
+        var taxonomyPart = new TaxonomyPart { TermContentType = "Tag" };
+        var autoRoutePart = new AutoroutePart { RouteContainedItems = true };
+        taxonomy.Apply(taxonomyPart);
+        taxonomy.Apply(autoRoutePart);
+
+        taxonomy.ContentItemId = await TestContentCreateAsync(context, apiClient, taxonomy);
+        await TestContentGetAsync(apiClient, taxonomy);
+        await TestContentRemoveAsync(context, apiClient, taxonomy);
     }
 
     private static async Task TestTenantCreateAsync(
@@ -207,6 +227,60 @@ public static class TestCaseUITestContextExtensions
         context.Missing(By.LinkText(editModel.Name));
 
         context.Configuration.TestOutputHelper.WriteLine("Removing the tenant succeeded.");
+    }
+
+    private static async Task<string> TestContentCreateAsync(
+        UITestContext context,
+        ApiClient apiClient,
+        ContentItem contentItem)
+    {
+        var response = await apiClient.OrchardCoreApi.CreateOrUpdateContentItemAsync(contentItem);
+        var contentItemIdFromAPI = JsonConvert.DeserializeObject<ContentItem>(response.Content).ContentItemId;
+        await context.GoToContentItemEditorByIdAsync(contentItemIdFromAPI);
+
+        context.Get(By.Id("TitlePart_Title")).GetValue().ShouldBe(contentItem.DisplayText);
+
+        context.Get(By.Id("AutoroutePart_RouteContainedItems")).GetValue()
+            .ShouldBe(contentItem.As<AutoroutePart>().RouteContainedItems.ToString().ToLowerFirstLetter());
+
+        context.Get(By.CssSelector("#TaxonomyPart_TermContentType option[selected]")).Text
+            .ShouldBe(contentItem.As<TaxonomyPart>().TermContentType);
+
+        return contentItemIdFromAPI;
+    }
+
+    private static async Task TestContentGetAsync(
+        ApiClient apiClient,
+        ContentItem contentItem)
+    {
+        var response = await apiClient.OrchardCoreApi.GetContentItemAsync(contentItem.ContentItemId);
+        var contentItemFromAPI = JsonConvert.DeserializeObject<ContentItem>(response.Content);
+
+        var document = JsonDocument.Parse(response.Content);
+
+        var contentItemFromAPIAutoroutePart = JsonConvert.DeserializeObject<AutoroutePart>(
+            document.RootElement.GetProperty("AutoroutePart").GetRawText());
+        var contentItemFromAPITaxonomyPart = JsonConvert.DeserializeObject<TaxonomyPart>(
+            document.RootElement.GetProperty("TaxonomyPart").GetRawText());
+
+        contentItemFromAPI.DisplayText.ShouldBe(contentItem.DisplayText);
+        contentItemFromAPI.ContentType.ShouldBe(contentItem.ContentType);
+        contentItemFromAPIAutoroutePart.RouteContainedItems.ShouldBe(contentItem.As<AutoroutePart>().RouteContainedItems);
+        contentItemFromAPITaxonomyPart.TermContentType.ShouldBe(contentItem.As<TaxonomyPart>().TermContentType);
+    }
+
+    private static async Task TestContentRemoveAsync(
+        UITestContext context,
+        ApiClient apiClient,
+        ContentItem contentItem)
+    {
+        await context.GoToContentItemListAsync();
+        context.Exists(By.XPath($"//a[contains(text(), '{contentItem.DisplayText}')]"));
+
+        await apiClient.OrchardCoreApi.RemoveContentItemAsync(contentItem.ContentItemId);
+
+        context.Refresh();
+        context.Missing(By.XPath($"//a[contains(text(), '{contentItem.DisplayText}')]"));
     }
 
     private static async Task GoToTenantUrlAndAssertHeaderAsync(
