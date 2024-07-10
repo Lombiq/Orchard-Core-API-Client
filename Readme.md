@@ -4,7 +4,7 @@
 
 ## About
 
-A client library for communicating with the [Orchard Core](https://www.orchardcore.net/) web APIs. Currently, it contains an implementation for the tenant management API and a console application for testing and demonstration.
+A client library for communicating with the [Orchard Core](https://www.orchardcore.net/) web APIs. Currently, it contains an implementation for the tenant and content management APIs and a console application for testing and demonstration.
 
 Do you want to quickly try out this project and see it in action? Check it out in our [Open-Source Orchard Core Extensions](https://github.com/Lombiq/Open-Source-Orchard-Core-Extensions) full Orchard Core solution and also see our other useful Orchard Core-related open-source projects!
 
