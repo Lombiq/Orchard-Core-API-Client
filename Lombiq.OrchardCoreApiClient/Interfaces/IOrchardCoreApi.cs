@@ -30,7 +30,9 @@ public interface IOrchardCoreApi
     /// <returns>The response of the tenant setup.</returns>
     [Post("/api/tenants/setup")]
     [Headers(AuthorizationBearer, RequestedWithXmlHttpRequest)]
-    Task<ApiResponse<string>> SetupAsync([Body(buffered: true)] TenantSetupApiModel setupTenantParameters);
+    Task<ApiResponse<string>> SetupAsync(
+        [Body(buffered: true)] TenantSetupApiModel setupTenantParameters,
+        [AliasAs("recipe")] StreamPart recipe = null);
 
     /// <summary>
     /// Edit a previously created tenant in Orchard Core.
