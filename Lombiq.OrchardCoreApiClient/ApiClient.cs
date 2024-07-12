@@ -95,7 +95,8 @@ public class ApiClient<TApi> : IDisposable
 
         try
         {
-            await OrchardCoreApi.SetupAsync(setupApiViewModel).ConfigureAwait(false);
+            using var response = await OrchardCoreApi.SetupAsync(setupApiViewModel).ConfigureAwait(false);
+            await response.EnsureSuccessStatusCodeAsync();
         }
         catch (ApiException ex)
         {
