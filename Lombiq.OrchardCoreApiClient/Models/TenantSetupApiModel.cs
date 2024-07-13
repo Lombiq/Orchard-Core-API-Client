@@ -14,6 +14,7 @@ public class TenantSetupApiModel
     public string DatabaseProvider { get; set; }
     public string ConnectionString { get; set; }
     public string TablePrefix { get; set; }
+    public string Schema { get; set; }
 
     [Required]
     public string UserName { get; set; }
