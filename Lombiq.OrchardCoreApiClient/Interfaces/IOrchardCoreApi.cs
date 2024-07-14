@@ -8,6 +8,7 @@ namespace Lombiq.OrchardCoreApiClient.Interfaces;
 /// <summary>
 /// Interface representing the subset of APIs of Orchard Core.
 /// </summary>
+// Keep this up-to-date with changes introduced in Orchard Core updates.
 public interface IOrchardCoreApi
 {
     /// <summary>
