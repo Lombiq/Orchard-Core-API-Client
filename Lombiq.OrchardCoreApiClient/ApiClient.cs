@@ -12,9 +12,48 @@ using System.Threading.Tasks;
 
 namespace Lombiq.OrchardCoreApiClient;
 
-public class ApiClient : ApiClient<IOrchardCoreApi>
+public class TenantsApiClient : ApiClient<IOrchardCoreTenantsApi>
 {
-    public ApiClient(ApiClientSettings apiClientSettings)
+    public TenantsApiClient(ApiClientSettings apiClientSettings)
+        : base(apiClientSettings)
+    {
+    }
+
+    public async Task CreateAndSetupTenantAsync(
+        TenantApiModel createApiViewModel,
+        TenantSetupApiModel setupApiViewModel)
+    {
+        if (!Timezones.TimezoneIds.Contains(setupApiViewModel.SiteTimeZone))
+        {
+            throw new ApiClientException(
+                $"Invalid timezone ID {setupApiViewModel.SiteTimeZone}. For the list of all valid timezone IDs " +
+                "follow this list: https://gist.github.com/jrolstad/5ca7d78dbfe182d7c1be");
+        }
+
+        try
+        {
+            using var response = await OrchardCoreApi.CreateAsync(createApiViewModel).ConfigureAwait(false);
+            await response.EnsureSuccessStatusCodeAsync();
+        }
+        catch (ApiException ex)
+        {
+            throw new ApiClientException("Tenant creation failed.", ex);
+        }
+
+        try
+        {
+            await OrchardCoreApi.SetupAsync(setupApiViewModel).ConfigureAwait(false);
+        }
+        catch (ApiException ex)
+        {
+            throw new ApiClientException("Tenant setup failed.", ex);
+        }
+    }
+}
+
+public class ContentsApiClient : ApiClient<IOrchardCoreContentsApi>
+{
+    public ContentsApiClient(ApiClientSettings apiClientSettings)
         : base(apiClientSettings)
     {
     }
@@ -71,37 +110,6 @@ public class ApiClient<TApi> : IDisposable
 
             // Throw the exception again so the caller can handle it as well.
             throw;
-        }
-    }
-
-    public async Task CreateAndSetupTenantAsync(
-        TenantApiModel createApiViewModel,
-        TenantSetupApiModel setupApiViewModel)
-    {
-        if (!Timezones.TimezoneIds.Contains(setupApiViewModel.SiteTimeZone))
-        {
-            throw new ApiClientException(
-                $"Invalid timezone ID {setupApiViewModel.SiteTimeZone}. For the list of all valid timezone IDs " +
-                "follow this list: https://gist.github.com/jrolstad/5ca7d78dbfe182d7c1be");
-        }
-
-        try
-        {
-            using var response = await OrchardCoreApi.CreateAsync(createApiViewModel).ConfigureAwait(false);
-            await response.EnsureSuccessStatusCodeAsync();
-        }
-        catch (ApiException ex)
-        {
-            throw new ApiClientException("Tenant creation failed.", ex);
-        }
-
-        try
-        {
-            await OrchardCoreApi.SetupAsync(setupApiViewModel).ConfigureAwait(false);
-        }
-        catch (ApiException ex)
-        {
-            throw new ApiClientException("Tenant setup failed.", ex);
         }
     }
 
