@@ -1,7 +1,9 @@
 using Lombiq.OrchardCoreApiClient.Models;
+using OrchardCore.ContentManagement;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Lombiq.OrchardCoreApiClient.Tester;
@@ -18,18 +20,20 @@ public static class Program
     public static async Task Main(string[] arguments)
     {
         var port = int.TryParse(arguments.FirstOrDefault(), out var customPort) ? customPort : 44335;
-        using var apiClient = new ApiClient(new ApiClientSettings
+        var apiClientSettings = new ApiClientSettings
         {
             ClientId = ClientId,
             ClientSecret = ClientSecret,
             DefaultTenantUri = new Uri("https://localhost:" + port.ToTechnicalString()),
-        });
+        };
+
+        using var tenantsApiClient = new TenantsApiClient(apiClientSettings);
 
         // A suffix is used to avoid name clashes on an existing site, as this test doesn't delete tenants.
         var suffix = DateTime.Now.Ticks.ToTechnicalString();
         var name = "ApiClientTenant" + suffix;
 
-        await apiClient.CreateAndSetupTenantAsync(
+        await tenantsApiClient.CreateAndSetupTenantAsync(
             new TenantApiModel
             {
                 Description = "Tenant created by API Client",
@@ -69,8 +73,28 @@ public static class Program
         };
 
         // Requires Orchard Core 1.6.0 or newer, on a 1.5.0 server this returns a 404 error.
-        await apiClient.OrchardCoreApi.EditAsync(editModel);
+        await tenantsApiClient.OrchardCoreApi.EditAsync(editModel);
 
         Console.WriteLine("Editing the tenant succeeded.");
+
+        using var contentsApiClient = new ContentsApiClient(apiClientSettings);
+
+        var taxonomy = new ContentItem
+        {
+            ContentType = "Taxonomy",
+            DisplayText = "Taxonomy created by API Client",
+        };
+
+        var response = await contentsApiClient.OrchardCoreApi.CreateOrUpdateAsync(taxonomy);
+        var contentItemIdFromApi = JsonSerializer.Deserialize<ContentItem>(response.Content).ContentItemId;
+
+        Console.WriteLine("Creating the taxonomy succeeded.");
+
+        taxonomy.ContentItemId = contentItemIdFromApi;
+        taxonomy.DisplayText = "Taxonomy edited by API Client";
+
+        await contentsApiClient.OrchardCoreApi.CreateOrUpdateAsync(taxonomy);
+
+        Console.WriteLine("Editing the taxonomy succeeded.");
     }
 }
