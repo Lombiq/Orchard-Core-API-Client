@@ -12,10 +12,13 @@
     {
       "name": "feature",
       "enable": [
+        "OrchardCore.Contents",
+        "OrchardCore.ContentTypes",
         "OrchardCore.OpenId",
         "OrchardCore.OpenId.Management",
         "OrchardCore.OpenId.Server",
         "OrchardCore.OpenId.Validation",
+        "OrchardCore.Taxonomies",
         "OrchardCore.Tenants"
       ]
     },

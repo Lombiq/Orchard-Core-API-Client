@@ -1,11 +1,16 @@
 using Atata;
+using Lombiq.OrchardCoreApiClient.Clients;
 using Lombiq.OrchardCoreApiClient.Models;
 using Lombiq.Tests.UI.Extensions;
 using Lombiq.Tests.UI.Services;
 using OpenQA.Selenium;
+using OrchardCore.Autoroute.Models;
+using OrchardCore.ContentManagement;
+using OrchardCore.Taxonomies.Models;
 using Shouldly;
 using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Lombiq.OrchardCoreApiClient.Tests.UI.Extensions;
@@ -71,13 +76,15 @@ public static class TestCaseUITestContextExtensions
             Category = "UI Test Tenants - Edited",
         };
 
-        using var apiClient = new ApiClient(new ApiClientSettings
+        var apiClientSettings = new ApiClientSettings
         {
             ClientId = clientId,
             ClientSecret = clientSecret,
             DefaultTenantUri = context.Scope.BaseUri,
             DisableCertificateValidation = true,
-        });
+        };
+
+        using var tenantsApiClient = new TenantsApiClient(apiClientSettings);
 
         const string defaultClientRecipe = "Lombiq.OrchardCoreApiClient.Tests.UI.OpenId";
         context.Scope.AtataContext.Log.Info($"Executing the default client recipe \"{defaultClientRecipe}\": {isDefaultClient}");
@@ -95,16 +102,33 @@ public static class TestCaseUITestContextExtensions
             await context.SignInDirectlyAsync();
         }
 
-        await TestTenantCreateAsync(context, apiClient, createApiModel);
-        await TestTenantSetupAsync(context, apiClient, createApiModel, setupApiModel);
-        await TestTenantEditAsync(context, apiClient, editModel, setupApiModel);
-        await TestTenantDisableAsync(context, apiClient, editModel);
-        await TestTenantRemoveAsync(context, apiClient, editModel);
+        await TestTenantCreateAsync(context, tenantsApiClient, createApiModel);
+        await TestTenantSetupAsync(context, tenantsApiClient, createApiModel, setupApiModel);
+        await TestTenantEditAsync(context, tenantsApiClient, editModel, setupApiModel);
+        await TestTenantDisableAsync(context, tenantsApiClient, editModel);
+        await TestTenantRemoveAsync(context, tenantsApiClient, editModel);
+
+        var taxonomy = new ContentItem
+        {
+            ContentType = "Taxonomy",
+            DisplayText = "Taxonomy created by UI test",
+        };
+
+        var taxonomyPart = new TaxonomyPart { TermContentType = "Tag" };
+        var autoRoutePart = new AutoroutePart { RouteContainedItems = true };
+        taxonomy.Apply(taxonomyPart);
+        taxonomy.Apply(autoRoutePart);
+
+        using var contentsApiClient = new ContentsApiClient(apiClientSettings);
+
+        taxonomy.ContentItemId = await TestContentCreateAsync(context, contentsApiClient, taxonomy);
+        await TestContentGetAsync(contentsApiClient, taxonomy);
+        await TestContentRemoveAsync(context, contentsApiClient, taxonomy);
     }
 
     private static async Task TestTenantCreateAsync(
         UITestContext context,
-        ApiClient apiClient,
+        TenantsApiClient apiClient,
         TenantApiModel createApiModel)
     {
         using (var response = await apiClient.OrchardCoreApi.CreateAsync(createApiModel))
@@ -139,7 +163,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantSetupAsync(
         UITestContext context,
-        ApiClient apiClient,
+        TenantsApiClient apiClient,
         TenantApiModel createApiModel,
         TenantSetupApiModel setupApiModel)
     {
@@ -157,7 +181,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantEditAsync(
         UITestContext context,
-        ApiClient apiClient,
+        TenantsApiClient apiClient,
         TenantApiModel editModel,
         TenantSetupApiModel setupApiModel)
     {
@@ -184,7 +208,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantDisableAsync(
         UITestContext context,
-        ApiClient apiClient,
+        TenantsApiClient apiClient,
         TenantApiModel editModel)
     {
         await apiClient.OrchardCoreApi.DisableAsync(editModel.Name);
@@ -197,7 +221,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantRemoveAsync(
         UITestContext context,
-        ApiClient apiClient,
+        TenantsApiClient apiClient,
         TenantApiModel editModel)
     {
         await apiClient.OrchardCoreApi.RemoveAsync(editModel.Name);
@@ -205,6 +229,60 @@ public static class TestCaseUITestContextExtensions
         context.Missing(By.LinkText(editModel.Name));
 
         context.Configuration.TestOutputHelper.WriteLine("Removing the tenant succeeded.");
+    }
+
+    private static async Task<string> TestContentCreateAsync(
+        UITestContext context,
+        ContentsApiClient apiClient,
+        ContentItem contentItem)
+    {
+        var response = await apiClient.OrchardCoreApi.CreateOrUpdateAsync(contentItem);
+        var contentItemIdFromApi = JsonSerializer.Deserialize<ContentItem>(response.Content).ContentItemId;
+        await context.GoToContentItemEditorByIdAsync(contentItemIdFromApi);
+
+        context.Get(By.Id("TitlePart_Title")).GetValue().ShouldBe(contentItem.DisplayText);
+
+        context.Get(By.Id("AutoroutePart_RouteContainedItems")).GetValue()
+            .ShouldBe(contentItem.As<AutoroutePart>().RouteContainedItems.ToString().ToLowerFirstLetter());
+
+        context.Get(By.CssSelector("#TaxonomyPart_TermContentType option[selected]")).Text
+            .ShouldBe(contentItem.As<TaxonomyPart>().TermContentType);
+
+        return contentItemIdFromApi;
+    }
+
+    private static async Task TestContentGetAsync(
+        ContentsApiClient apiClient,
+        ContentItem contentItem)
+    {
+        var response = await apiClient.OrchardCoreApi.GetAsync(contentItem.ContentItemId);
+        var contentItemFromApi = JsonSerializer.Deserialize<ContentItem>(response.Content);
+
+        var document = JsonDocument.Parse(response.Content);
+
+        var contentItemFromApiAutoroutePart = JsonSerializer.Deserialize<AutoroutePart>(
+            document.RootElement.GetProperty("AutoroutePart").GetRawText());
+        var contentItemFromApiTaxonomyPart = JsonSerializer.Deserialize<TaxonomyPart>(
+            document.RootElement.GetProperty("TaxonomyPart").GetRawText());
+
+        contentItemFromApi.DisplayText.ShouldBe(contentItem.DisplayText);
+        contentItemFromApi.ContentType.ShouldBe(contentItem.ContentType);
+        contentItemFromApiAutoroutePart.RouteContainedItems.ShouldBe(contentItem.As<AutoroutePart>().RouteContainedItems);
+        contentItemFromApiTaxonomyPart.TermContentType.ShouldBe(contentItem.As<TaxonomyPart>().TermContentType);
+    }
+
+    private static async Task TestContentRemoveAsync(
+        UITestContext context,
+        ContentsApiClient apiClient,
+        ContentItem contentItem)
+    {
+        await context.GoToContentItemListAsync();
+        context.Exists(By.XPath($"//a[contains(text(), '{contentItem.DisplayText}')]"));
+
+        await apiClient.OrchardCoreApi.RemoveAsync(contentItem.ContentItemId);
+
+        context.Refresh();
+        context.Missing(By.XPath($"//a[contains(text(), '{contentItem.DisplayText}')]"));
     }
 
     private static async Task GoToTenantUrlAndAssertHeaderAsync(
