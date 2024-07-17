@@ -37,7 +37,8 @@ public class TenantsApiClient : ApiClient<IOrchardCoreTenantsApi>
 
         try
         {
-            await OrchardCoreApi.SetupAsync(setupApiViewModel).ConfigureAwait(false);
+            using var response = await OrchardCoreApi.SetupAsync(setupApiViewModel).ConfigureAwait(false);
+            await response.EnsureSuccessStatusCodeAsync();
         }
         catch (ApiException ex)
         {

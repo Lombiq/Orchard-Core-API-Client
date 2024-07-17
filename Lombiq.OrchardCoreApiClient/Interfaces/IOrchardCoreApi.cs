@@ -5,7 +5,7 @@ namespace Lombiq.OrchardCoreApiClient.Interfaces;
 /// <summary>
 /// Base interface for representing APIs of Orchard Core.
 /// </summary>
-// Keep this up-to-date with changes introduced in Orchard Core updates.
+// Keep this and the inherited interfaces up-to-date with changes introduced in Orchard Core updates.
 [SuppressMessage(
     "Design",
     "CA1040:Avoid empty interfaces",
