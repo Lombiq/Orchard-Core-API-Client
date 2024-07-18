@@ -48,7 +48,7 @@ public static class TestCaseUITestContextExtensions
             DatabaseProvider = databaseProvider,
             RequestUrlPrefix = prefix,
             RequestUrlHost = string.Empty,
-            ConnectionString = string.Empty,
+            ConnectionString = context.SqlServerRunningContext?.ConnectionString,
             TablePrefix = prefix,
             RecipeName = "Blog",
             Category = "UI Test Tenants",
@@ -58,8 +58,6 @@ public static class TestCaseUITestContextExtensions
         var setupApiModel = new TenantSetupApiModel
         {
             Name = tenantName,
-            DatabaseProvider = databaseProvider,
-            ConnectionString = string.Empty,
             RecipeName = "Blog",
             UserName = "admin",
             Email = "admin@example.com",
@@ -151,7 +149,7 @@ public static class TestCaseUITestContextExtensions
         context.Get(By.CssSelector("#RecipeName option[selected]")).Text
             .ShouldBe(createApiModel.RecipeName);
 
-        context.Get(By.CssSelector("#DatabaseProvider option[selected]")).Text
+        context.Get(By.CssSelector("#DatabaseProvider option[selected]")).GetValue()
             .ShouldBe(createApiModel.DatabaseProvider);
 
         if (createApiModel.FeatureProfiles != null)
