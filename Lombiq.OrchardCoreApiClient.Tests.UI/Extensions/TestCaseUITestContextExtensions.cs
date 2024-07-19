@@ -76,7 +76,8 @@ public static class TestCaseUITestContextExtensions
             Category = "UI Test Tenants - Edited",
         };
 
-        using var tenantsApiClient = new TenantsApiClient(CreateApiClientSettings(context, clientId, clientSecret));
+        var apiClientSettings = CreateApiClientSettings(context, clientId, clientSecret);
+        using var tenantsApiClient = new TenantsApiClient(apiClientSettings);
 
         var isDefaultClient = string.IsNullOrEmpty(clientId);
 
@@ -90,7 +91,7 @@ public static class TestCaseUITestContextExtensions
             // Verify that the recipe has successfully created the application.
             await context.SignInDirectlyAsync();
             await context.GoToAdminRelativeUrlAsync("/OpenId/Application/Edit/1");
-            context.Get(By.Name("ClientId")).GetAttribute("value").ShouldBe(clientId);
+            context.Get(By.Name("ClientId")).GetAttribute("value").ShouldBe(apiClientSettings.ClientId);
         }
         else
         {
