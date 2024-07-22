@@ -25,21 +25,21 @@ public static class TestCaseUITestContextExtensions
         string clientSecret = null,
         string featureProfile = null)
     {
+        await context.TestTenantsOrchardCoreApiClientBehaviorAsync(clientId, clientSecret, featureProfile);
+        await context.TestContentsOrchardCoreApiClientBehaviorAsync(clientId, clientSecret);
+    }
+
+    public static async Task TestTenantsOrchardCoreApiClientBehaviorAsync(
+        this UITestContext context,
+        string clientId = null,
+        string clientSecret = null,
+        string featureProfile = null)
+    {
         const string tenantName = "UITestTenant";
         const string prefix = "uitesttenant"; // #spell-check-ignore-line
         var databaseProvider = context.Configuration.UseSqlServer
             ? "SqlConnection"
             : "Sqlite";
-
-        var isDefaultClient = string.IsNullOrEmpty(clientId);
-        if (isDefaultClient)
-        {
-            // If the client ID is not set, change both ID and secret to the default.
-#pragma warning disable S1226 // Introduce a new variable instead of reusing the parameter.
-            clientId = "UITest";
-            clientSecret = "Password";
-#pragma warning restore S1226 // Introduce a new variable instead of reusing the parameter.
-        }
 
         var createApiModel = new TenantApiModel
         {
@@ -76,18 +76,14 @@ public static class TestCaseUITestContextExtensions
             Category = "UI Test Tenants - Edited",
         };
 
-        var apiClientSettings = new ApiClientSettings
-        {
-            ClientId = clientId,
-            ClientSecret = clientSecret,
-            DefaultTenantUri = context.Scope.BaseUri,
-            DisableCertificateValidation = true,
-        };
-
+        var apiClientSettings = CreateApiClientSettings(context, clientId, clientSecret);
         using var tenantsApiClient = new TenantsApiClient(apiClientSettings);
+
+        var isDefaultClient = string.IsNullOrEmpty(clientId);
 
         const string defaultClientRecipe = "Lombiq.OrchardCoreApiClient.Tests.UI.OpenId";
         context.Scope.AtataContext.Log.Info($"Executing the default client recipe \"{defaultClientRecipe}\": {isDefaultClient}");
+
         if (isDefaultClient)
         {
             await context.ExecuteRecipeDirectlyAsync(defaultClientRecipe);
@@ -95,7 +91,7 @@ public static class TestCaseUITestContextExtensions
             // Verify that the recipe has successfully created the application.
             await context.SignInDirectlyAsync();
             await context.GoToAdminRelativeUrlAsync("/OpenId/Application/Edit/1");
-            context.Get(By.Name("ClientId")).GetAttribute("value").ShouldBe(clientId);
+            context.Get(By.Name("ClientId")).GetAttribute("value").ShouldBe(apiClientSettings.ClientId);
         }
         else
         {
@@ -107,7 +103,13 @@ public static class TestCaseUITestContextExtensions
         await TestTenantEditAsync(context, tenantsApiClient, editModel, setupApiModel);
         await TestTenantDisableAsync(context, tenantsApiClient, editModel);
         await TestTenantRemoveAsync(context, tenantsApiClient, editModel);
+    }
 
+    public static async Task TestContentsOrchardCoreApiClientBehaviorAsync(
+        this UITestContext context,
+        string clientId = null,
+        string clientSecret = null)
+    {
         var taxonomy = new ContentItem
         {
             ContentType = "Taxonomy",
@@ -119,7 +121,7 @@ public static class TestCaseUITestContextExtensions
         taxonomy.Apply(taxonomyPart);
         taxonomy.Apply(autoRoutePart);
 
-        using var contentsApiClient = new ContentsApiClient(apiClientSettings);
+        using var contentsApiClient = new ContentsApiClient(CreateApiClientSettings(context, clientId, clientSecret));
 
         taxonomy.ContentItemId = await TestContentCreateAsync(context, contentsApiClient, taxonomy);
         await TestContentGetAsync(contentsApiClient, taxonomy);
@@ -315,5 +317,26 @@ public static class TestCaseUITestContextExtensions
 
         context.Get(By.CssSelector("#Category")).GetValue()
             .ShouldBe(apiModel.Category);
+    }
+
+    private static ApiClientSettings CreateApiClientSettings(UITestContext context, string clientId, string clientSecret)
+    {
+        var isDefaultClient = string.IsNullOrEmpty(clientId);
+        if (isDefaultClient)
+        {
+            // This isn't an issue in this small method.
+#pragma warning disable S1226 // Introduce a new variable instead of reusing the parameter.
+            clientId = "UITest";
+            clientSecret = "Password";
+#pragma warning restore S1226 // Introduce a new variable instead of reusing the parameter.
+        }
+
+        return new()
+        {
+            ClientId = clientId,
+            ClientSecret = clientSecret,
+            DefaultTenantUri = context.Scope.BaseUri,
+            DisableCertificateValidation = true,
+        };
     }
 }
