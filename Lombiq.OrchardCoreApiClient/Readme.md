@@ -2,7 +2,7 @@
 
 ## About
 
-A client library for communicating with the [Orchard Core](https://www.orchardcore.net/) web APIs. Currently, it contains an implementation for the tenant management API.
+A client library for communicating with the [Orchard Core](https://www.orchardcore.net/) web APIs. Currently, it contains an implementation for the tenant and content management APIs.
 
 ## Documentation
 

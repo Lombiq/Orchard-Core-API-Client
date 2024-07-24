@@ -1,11 +1,16 @@
 using Atata;
+using Lombiq.OrchardCoreApiClient.Clients;
 using Lombiq.OrchardCoreApiClient.Models;
 using Lombiq.Tests.UI.Extensions;
 using Lombiq.Tests.UI.Services;
 using OpenQA.Selenium;
+using OrchardCore.Autoroute.Models;
+using OrchardCore.ContentManagement;
+using OrchardCore.Taxonomies.Models;
 using Shouldly;
 using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Lombiq.OrchardCoreApiClient.Tests.UI.Extensions;
@@ -20,21 +25,21 @@ public static class TestCaseUITestContextExtensions
         string clientSecret = null,
         string featureProfile = null)
     {
+        await context.TestTenantsOrchardCoreApiClientBehaviorAsync(clientId, clientSecret, featureProfile);
+        await context.TestContentsOrchardCoreApiClientBehaviorAsync(clientId, clientSecret);
+    }
+
+    public static async Task TestTenantsOrchardCoreApiClientBehaviorAsync(
+        this UITestContext context,
+        string clientId = null,
+        string clientSecret = null,
+        string featureProfile = null)
+    {
         const string tenantName = "UITestTenant";
         const string prefix = "uitesttenant"; // #spell-check-ignore-line
         var databaseProvider = context.Configuration.UseSqlServer
             ? "SqlConnection"
             : "Sqlite";
-
-        var isDefaultClient = string.IsNullOrEmpty(clientId);
-        if (isDefaultClient)
-        {
-            // If the client ID is not set, change both ID and secret to the default.
-#pragma warning disable S1226 // Introduce a new variable instead of reusing the parameter.
-            clientId = "UITest";
-            clientSecret = "Password";
-#pragma warning restore S1226 // Introduce a new variable instead of reusing the parameter.
-        }
 
         var createApiModel = new TenantApiModel
         {
@@ -43,7 +48,7 @@ public static class TestCaseUITestContextExtensions
             DatabaseProvider = databaseProvider,
             RequestUrlPrefix = prefix,
             RequestUrlHost = string.Empty,
-            ConnectionString = string.Empty,
+            ConnectionString = context.SqlServerRunningContext?.ConnectionString,
             TablePrefix = prefix,
             RecipeName = "Blog",
             Category = "UI Test Tenants",
@@ -53,8 +58,6 @@ public static class TestCaseUITestContextExtensions
         var setupApiModel = new TenantSetupApiModel
         {
             Name = tenantName,
-            DatabaseProvider = databaseProvider,
-            ConnectionString = string.Empty,
             RecipeName = "Blog",
             UserName = "admin",
             Email = "admin@example.com",
@@ -73,16 +76,14 @@ public static class TestCaseUITestContextExtensions
             Category = "UI Test Tenants - Edited",
         };
 
-        using var apiClient = new ApiClient(new ApiClientSettings
-        {
-            ClientId = clientId,
-            ClientSecret = clientSecret,
-            DefaultTenantUri = context.Scope.BaseUri,
-            DisableCertificateValidation = true,
-        });
+        var apiClientSettings = CreateApiClientSettings(context, clientId, clientSecret);
+        using var tenantsApiClient = new TenantsApiClient(apiClientSettings);
+
+        var isDefaultClient = string.IsNullOrEmpty(clientId);
 
         const string defaultClientRecipe = "Lombiq.OrchardCoreApiClient.Tests.UI.OpenId";
         context.Scope.AtataContext.Log.Info($"Executing the default client recipe \"{defaultClientRecipe}\": {isDefaultClient}");
+
         if (isDefaultClient)
         {
             await context.ExecuteRecipeDirectlyAsync(defaultClientRecipe);
@@ -90,23 +91,46 @@ public static class TestCaseUITestContextExtensions
             // Verify that the recipe has successfully created the application.
             await context.SignInDirectlyAsync();
             await context.GoToAdminRelativeUrlAsync("/OpenId/Application/Edit/1");
-            context.Get(By.Name("ClientId")).GetAttribute("value").ShouldBe(clientId);
+            context.Get(By.Name("ClientId")).GetAttribute("value").ShouldBe(apiClientSettings.ClientId);
         }
         else
         {
             await context.SignInDirectlyAsync();
         }
 
-        await TestTenantCreateAsync(context, apiClient, createApiModel);
-        await TestTenantSetupAsync(context, apiClient, createApiModel, setupApiModel);
-        await TestTenantEditAsync(context, apiClient, editModel, setupApiModel);
-        await TestTenantDisableAsync(context, apiClient, editModel);
-        await TestTenantRemoveAsync(context, apiClient, editModel);
+        await TestTenantCreateAsync(context, tenantsApiClient, createApiModel);
+        await TestTenantSetupAsync(context, tenantsApiClient, createApiModel, setupApiModel);
+        await TestTenantEditAsync(context, tenantsApiClient, editModel, setupApiModel);
+        await TestTenantDisableAsync(context, tenantsApiClient, editModel);
+        await TestTenantRemoveAsync(context, tenantsApiClient, editModel);
+    }
+
+    public static async Task TestContentsOrchardCoreApiClientBehaviorAsync(
+        this UITestContext context,
+        string clientId = null,
+        string clientSecret = null)
+    {
+        var taxonomy = new ContentItem
+        {
+            ContentType = "Taxonomy",
+            DisplayText = "Taxonomy created by UI test",
+        };
+
+        var taxonomyPart = new TaxonomyPart { TermContentType = "Tag" };
+        var autoRoutePart = new AutoroutePart { RouteContainedItems = true };
+        taxonomy.Apply(taxonomyPart);
+        taxonomy.Apply(autoRoutePart);
+
+        using var contentsApiClient = new ContentsApiClient(CreateApiClientSettings(context, clientId, clientSecret));
+
+        taxonomy.ContentItemId = await TestContentCreateAsync(context, contentsApiClient, taxonomy);
+        await TestContentGetAsync(contentsApiClient, taxonomy);
+        await TestContentRemoveAsync(context, contentsApiClient, taxonomy);
     }
 
     private static async Task TestTenantCreateAsync(
         UITestContext context,
-        ApiClient apiClient,
+        TenantsApiClient apiClient,
         TenantApiModel createApiModel)
     {
         using (var response = await apiClient.OrchardCoreApi.CreateAsync(createApiModel))
@@ -127,7 +151,7 @@ public static class TestCaseUITestContextExtensions
         context.Get(By.CssSelector("#RecipeName option[selected]")).Text
             .ShouldBe(createApiModel.RecipeName);
 
-        context.Get(By.CssSelector("#DatabaseProvider option[selected]")).Text
+        context.Get(By.CssSelector("#DatabaseProvider option[selected]")).GetValue()
             .ShouldBe(createApiModel.DatabaseProvider);
 
         if (createApiModel.FeatureProfiles != null)
@@ -141,7 +165,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantSetupAsync(
         UITestContext context,
-        ApiClient apiClient,
+        TenantsApiClient apiClient,
         TenantApiModel createApiModel,
         TenantSetupApiModel setupApiModel)
     {
@@ -159,7 +183,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantEditAsync(
         UITestContext context,
-        ApiClient apiClient,
+        TenantsApiClient apiClient,
         TenantApiModel editModel,
         TenantSetupApiModel setupApiModel)
     {
@@ -186,7 +210,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantDisableAsync(
         UITestContext context,
-        ApiClient apiClient,
+        TenantsApiClient apiClient,
         TenantApiModel editModel)
     {
         await apiClient.OrchardCoreApi.DisableAsync(editModel.Name);
@@ -198,7 +222,7 @@ public static class TestCaseUITestContextExtensions
 
     private static async Task TestTenantRemoveAsync(
         UITestContext context,
-        ApiClient apiClient,
+        TenantsApiClient apiClient,
         TenantApiModel editModel)
     {
         await apiClient.OrchardCoreApi.RemoveAsync(editModel.Name);
@@ -206,6 +230,60 @@ public static class TestCaseUITestContextExtensions
         context.Missing(By.LinkText(editModel.Name));
 
         context.Configuration.TestOutputHelper.WriteLine("Removing the tenant succeeded.");
+    }
+
+    private static async Task<string> TestContentCreateAsync(
+        UITestContext context,
+        ContentsApiClient apiClient,
+        ContentItem contentItem)
+    {
+        var response = await apiClient.OrchardCoreApi.CreateOrUpdateAsync(contentItem);
+        var contentItemIdFromApi = JsonSerializer.Deserialize<ContentItem>(response.Content).ContentItemId;
+        await context.GoToContentItemEditorByIdAsync(contentItemIdFromApi);
+
+        context.Get(By.Id("TitlePart_Title")).GetValue().ShouldBe(contentItem.DisplayText);
+
+        context.Get(By.Id("AutoroutePart_RouteContainedItems")).GetValue()
+            .ShouldBe(contentItem.As<AutoroutePart>().RouteContainedItems.ToString().ToLowerFirstLetter());
+
+        context.Get(By.CssSelector("#TaxonomyPart_TermContentType option[selected]")).Text
+            .ShouldBe(contentItem.As<TaxonomyPart>().TermContentType);
+
+        return contentItemIdFromApi;
+    }
+
+    private static async Task TestContentGetAsync(
+        ContentsApiClient apiClient,
+        ContentItem contentItem)
+    {
+        var response = await apiClient.OrchardCoreApi.GetAsync(contentItem.ContentItemId);
+        var contentItemFromApi = JsonSerializer.Deserialize<ContentItem>(response.Content);
+
+        var document = JsonDocument.Parse(response.Content);
+
+        var contentItemFromApiAutoroutePart = JsonSerializer.Deserialize<AutoroutePart>(
+            document.RootElement.GetProperty("AutoroutePart").GetRawText());
+        var contentItemFromApiTaxonomyPart = JsonSerializer.Deserialize<TaxonomyPart>(
+            document.RootElement.GetProperty("TaxonomyPart").GetRawText());
+
+        contentItemFromApi.DisplayText.ShouldBe(contentItem.DisplayText);
+        contentItemFromApi.ContentType.ShouldBe(contentItem.ContentType);
+        contentItemFromApiAutoroutePart.RouteContainedItems.ShouldBe(contentItem.As<AutoroutePart>().RouteContainedItems);
+        contentItemFromApiTaxonomyPart.TermContentType.ShouldBe(contentItem.As<TaxonomyPart>().TermContentType);
+    }
+
+    private static async Task TestContentRemoveAsync(
+        UITestContext context,
+        ContentsApiClient apiClient,
+        ContentItem contentItem)
+    {
+        await context.GoToContentItemListAsync();
+        context.Exists(By.XPath($"//a[contains(text(), '{contentItem.DisplayText}')]"));
+
+        await apiClient.OrchardCoreApi.RemoveAsync(contentItem.ContentItemId);
+
+        context.Refresh();
+        context.Missing(By.XPath($"//a[contains(text(), '{contentItem.DisplayText}')]"));
     }
 
     private static async Task GoToTenantUrlAndAssertHeaderAsync(
@@ -238,5 +316,26 @@ public static class TestCaseUITestContextExtensions
 
         context.Get(By.CssSelector("#Category")).GetValue()
             .ShouldBe(apiModel.Category);
+    }
+
+    private static ApiClientSettings CreateApiClientSettings(UITestContext context, string clientId, string clientSecret)
+    {
+        var isDefaultClient = string.IsNullOrEmpty(clientId);
+        if (isDefaultClient)
+        {
+            // This isn't an issue in this small method.
+#pragma warning disable S1226 // Introduce a new variable instead of reusing the parameter.
+            clientId = "UITest";
+            clientSecret = "Password";
+#pragma warning restore S1226 // Introduce a new variable instead of reusing the parameter.
+        }
+
+        return new()
+        {
+            ClientId = clientId,
+            ClientSecret = clientSecret,
+            DefaultTenantUri = context.Scope.BaseUri,
+            DisableCertificateValidation = true,
+        };
     }
 }
