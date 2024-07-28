@@ -52,7 +52,6 @@ public static class Program
                 Name = name,
                 DatabaseProvider = "Sqlite",
                 ConnectionString = string.Empty,
-                RecipeName = "Blog",
                 UserName = "admin",
                 Email = "admin@example.com",
                 Password = "Password1!",

@@ -1,5 +1,4 @@
 using Atata;
-using FluentAssertions;
 using Lombiq.OrchardCoreApiClient.Clients;
 using Lombiq.OrchardCoreApiClient.Models;
 using Lombiq.Tests.UI.Extensions;
@@ -216,9 +215,7 @@ public static class TestCaseUITestContextExtensions
     {
         await apiClient.OrchardCoreApi.DisableAsync(editModel.Name);
         await context.GoToAdminRelativeUrlAsync("/Tenants");
-        var href = context.GetAbsoluteAdminUri($"/Tenants/Enable/{editModel.Name}").ToString();
-        var buttonLinks = context.GetAll(By.LinkText("Enable")).Select(element => element.GetAttribute("href")).ToList();
-        buttonLinks.Should().Contain(href);
+        context.Exists(By.XPath($"//a[contains(., 'Enable') and contains(@href, '{editModel.Name}')]"));
 
         context.Configuration.TestOutputHelper.WriteLine("Disabling the tenant succeeded.");
     }
