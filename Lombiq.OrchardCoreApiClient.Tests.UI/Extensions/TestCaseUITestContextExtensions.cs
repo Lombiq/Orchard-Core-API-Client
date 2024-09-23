@@ -1,4 +1,5 @@
 using Atata;
+using Lombiq.HelpfulLibraries.OrchardCore.Mvc;
 using Lombiq.OrchardCoreApiClient.Clients;
 using Lombiq.OrchardCoreApiClient.Models;
 using Lombiq.Tests.UI.Extensions;
@@ -90,7 +91,10 @@ public static class TestCaseUITestContextExtensions
 
             // Verify that the recipe has successfully created the application.
             await context.SignInDirectlyAsync();
-            await context.GoToAdminRelativeUrlAsync("/OpenId/Application/Edit/1");
+            await context.GoToAdminRelativeUrlAsync("/OpenId/Application");
+            await context.ClickReliablyOnAsync(
+                By.XPath($"//li[contains(@class, 'list-group-item') and contains(., '{apiClientSettings.ClientId}')]" +
+                         $"//a[normalize-space(.) = 'Edit']"));
             context.Get(By.Name("ClientId")).GetAttribute("value").ShouldBe(apiClientSettings.ClientId);
         }
         else
