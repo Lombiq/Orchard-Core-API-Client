@@ -90,7 +90,10 @@ public static class TestCaseUITestContextExtensions
 
             // Verify that the recipe has successfully created the application.
             await context.SignInDirectlyAsync();
-            await context.GoToAdminRelativeUrlAsync("/OpenId/Application/Edit/1");
+            await context.GoToAdminRelativeUrlAsync("/OpenId/Application");
+            await context.ClickReliablyOnAsync(
+                By.XPath($"//li[contains(@class, 'list-group-item') and contains(., '{apiClientSettings.ClientId}')]" +
+                         $"//a[normalize-space(.) = 'Edit']"));
             context.Get(By.Name("ClientId")).GetAttribute("value").ShouldBe(apiClientSettings.ClientId);
         }
         else
@@ -215,8 +218,7 @@ public static class TestCaseUITestContextExtensions
     {
         await apiClient.OrchardCoreApi.DisableAsync(editModel.Name);
         await context.GoToAdminRelativeUrlAsync("/Tenants");
-        var href = context.GetAbsoluteAdminUri($"/OrchardCore.Tenants/Admin/Enable/{editModel.Name}").ToString();
-        context.GetAll(By.LinkText("Enable")).ShouldContain(element => element.GetAttribute("href") == href);
+        context.Exists(By.XPath($"//a[contains(., 'Enable') and contains(@href, '{editModel.Name}')]"));
 
         context.Configuration.TestOutputHelper.WriteLine("Disabling the tenant succeeded.");
     }

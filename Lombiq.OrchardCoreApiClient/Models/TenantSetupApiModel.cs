@@ -1,6 +1,6 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 
 namespace Lombiq.OrchardCoreApiClient.Models;
 
@@ -14,6 +14,7 @@ public class TenantSetupApiModel
     public string DatabaseProvider { get; set; }
     public string ConnectionString { get; set; }
     public string TablePrefix { get; set; }
+    public string Schema { get; set; }
 
     [Required]
     public string UserName { get; set; }
@@ -25,8 +26,8 @@ public class TenantSetupApiModel
     public string Password { get; set; }
     public string RecipeName { get; set; }
 
-    [JsonProperty("Recipe")]
-    public JToken RecipeJson { get; set; }
+    [JsonPropertyName("Recipe")]
+    public JsonNode RecipeJson { get; set; }
 
     public string SiteTimeZone { get; set; }
 }

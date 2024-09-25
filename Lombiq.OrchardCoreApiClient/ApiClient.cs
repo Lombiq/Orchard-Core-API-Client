@@ -1,4 +1,3 @@
-using Lombiq.HelpfulLibraries.Refit.Helpers;
 using Lombiq.OrchardCoreApiClient.Exceptions;
 using Lombiq.OrchardCoreApiClient.Interfaces;
 using Lombiq.OrchardCoreApiClient.Models;
@@ -28,8 +27,7 @@ public class ApiClient<TApi> : IDisposable
         {
             _httpClient = ConfigurableCertificateValidatingHttpClientHandler.CreateClient(apiClientSettings);
 
-            // We use Newtonsoft Json.NET because Orchard Core uses it too, so the models will behave the same.
-            return RefitHelper.WithNewtonsoftJson<TApi>(_httpClient);
+            return RestService.For<TApi>(_httpClient);
         });
 
         RetryPolicy = InitRetryPolicy();

@@ -1,11 +1,10 @@
-using Lombiq.HelpfulLibraries.Refit.Helpers;
 using Lombiq.OrchardCoreApiClient.Exceptions;
 using Lombiq.OrchardCoreApiClient.Interfaces;
 using Lombiq.OrchardCoreApiClient.Models;
+using Refit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
@@ -48,8 +47,8 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
             Token tokenResponse;
             try
             {
-                tokenResponse = await RefitHelper
-                    .WithNewtonsoftJson<IOrchardCoreAuthorizationApi>(httpClient)
+                tokenResponse = await RestService
+                    .For<IOrchardCoreAuthorizationApi>(httpClient)
                     .TokenAsync(
                         new Dictionary<string, string>
                         {
@@ -71,8 +70,7 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
                     $"API client setup failed. An error occurred while retrieving an access token: {error}");
             }
 
-            int tokenExpiration = int.Parse(tokenResponse.ExpiresIn, CultureInfo.InvariantCulture);
-            _expirationDateUtc = DateTime.UtcNow.AddSeconds(tokenExpiration);
+            _expirationDateUtc = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
 
             _tokenResponse = tokenResponse;
         }
