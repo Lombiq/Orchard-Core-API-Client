@@ -105,6 +105,11 @@ public static class TestCaseUITestContextExtensions
         await TestTenantSetupAsync(context, tenantsApiClient, createApiModel, setupApiModel);
         await TestTenantEditAsync(context, tenantsApiClient, editModel, setupApiModel);
         await TestTenantDisableAsync(context, tenantsApiClient, editModel);
+
+        // Workaround for https://github.com/OrchardCMS/OrchardCore/issues/16849.
+        await context.Application.PauseAsync();
+        await context.Application.ResumeAsync();
+
         await TestTenantRemoveAsync(context, tenantsApiClient, editModel);
     }
 
