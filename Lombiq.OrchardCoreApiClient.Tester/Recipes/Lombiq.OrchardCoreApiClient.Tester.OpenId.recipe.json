@@ -24,7 +24,7 @@
     },
     {
       "name": "OpenIdServerSettings",
-      "AccessTokenFormat": 1,
+      "AccessTokenFormat": "JsonWebToken",
       "DisableAccessTokenEncryption": false,
       "EnableTokenEndpoint": true,
       "EnableAuthorizationEndpoint": false,
