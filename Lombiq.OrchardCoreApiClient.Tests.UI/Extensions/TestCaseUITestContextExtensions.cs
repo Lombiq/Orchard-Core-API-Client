@@ -36,7 +36,7 @@ public static class TestCaseUITestContextExtensions
         string featureProfile = null)
     {
         const string tenantName = "UITestTenant";
-        const string prefix = "uitesttenant"; // #spell-check-ignore-line
+        const string prefix = "uitesttenant";
         var databaseProvider = context.Configuration.UseSqlServer
             ? "SqlConnection"
             : "Sqlite";

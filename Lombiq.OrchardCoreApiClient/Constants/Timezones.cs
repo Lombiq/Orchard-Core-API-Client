@@ -9,7 +9,7 @@ public static class Timezones
     private static IList<string> _timezoneIds;
     public static IList<string> TimezoneIds => _timezoneIds ??= GetTimeZoneIds();
 
-    public static IList<string> GetTimeZoneIds() => TzdbDateTimeZoneSource.Default // #spell-check-ignore-line
+    public static IList<string> GetTimeZoneIds() => TzdbDateTimeZoneSource.Default
         .ZoneLocations
         .Select(timeZone => timeZone.ZoneId)
         .ToList();

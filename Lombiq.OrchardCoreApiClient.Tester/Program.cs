@@ -43,7 +43,7 @@ public static class Program
                 RequestUrlPrefix = "api-client-tenant-" + suffix,
                 RequestUrlHost = string.Empty,
                 ConnectionString = string.Empty,
-                TablePrefix = "apiclienttenant" + suffix, // #spell-check-ignore-line
+                TablePrefix = "apiclienttenant" + suffix,
                 RecipeName = "Blog",
                 Category = "API Client Tenants",
             },
@@ -57,7 +57,7 @@ public static class Program
                 Password = "Password1!",
                 SiteName = "Api Client Tenant Site",
                 SiteTimeZone = "Europe/Budapest",
-                TablePrefix = "apiclienttenant" + suffix, // #spell-check-ignore-line
+                TablePrefix = "apiclienttenant" + suffix,
             }
         );
 
