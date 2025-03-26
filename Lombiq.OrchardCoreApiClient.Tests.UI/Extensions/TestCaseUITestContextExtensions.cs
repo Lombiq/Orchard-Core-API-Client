@@ -1,6 +1,7 @@
 using Atata;
 using Lombiq.OrchardCoreApiClient.Clients;
 using Lombiq.OrchardCoreApiClient.Models;
+using Lombiq.Tests.UI.Constants;
 using Lombiq.Tests.UI.Extensions;
 using Lombiq.Tests.UI.Services;
 using OpenQA.Selenium;
@@ -59,9 +60,9 @@ public static class TestCaseUITestContextExtensions
         {
             Name = tenantName,
             RecipeName = "Blog",
-            UserName = "admin",
-            Email = "admin@example.com",
-            Password = "Password1!",
+            UserName = DefaultUser.UserName,
+            Email = DefaultUser.Email,
+            Password = DefaultUser.Password,
             SiteName = "UI Test Tenant Site",
             SiteTimeZone = "Europe/Budapest",
             TablePrefix = prefix,
