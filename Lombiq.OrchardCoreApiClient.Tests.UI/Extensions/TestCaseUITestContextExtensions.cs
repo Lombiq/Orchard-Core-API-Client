@@ -34,22 +34,19 @@ public static class TestCaseUITestContextExtensions
         this UITestContext context,
         string clientId = null,
         string clientSecret = null,
-        string featureProfile = null)
+        string featureProfile = null,
+        string requestUrlHost = null)
     {
         const string tenantName = "UITestTenant";
         const string prefix = "uitesttenant";
-        var databaseProvider = context.Configuration.UseSqlServer
-            ? "SqlConnection"
-            : "Sqlite";
+        var isLocalTest = context.TestStartUri.Host.ContainsOrdinalIgnoreCase("localhost");
 
         var createApiModel = new TenantApiModel
         {
             Description = "Tenant created by UI test",
             Name = tenantName,
-            DatabaseProvider = databaseProvider,
             RequestUrlPrefix = prefix,
-            RequestUrlHost = string.Empty,
-            ConnectionString = context.SqlServerRunningContext?.ConnectionString,
+            RequestUrlHost = requestUrlHost,
             TablePrefix = prefix,
             RecipeName = "Blog",
             Category = "UI Test Tenants",
@@ -73,9 +70,20 @@ public static class TestCaseUITestContextExtensions
             Description = "Tenant edited by UI test",
             Name = tenantName,
             RequestUrlPrefix = prefix + "edited",
-            RequestUrlHost = string.Empty,
+            RequestUrlHost = requestUrlHost,
             Category = "UI Test Tenants - Edited",
         };
+
+        if (isLocalTest)
+        {
+            var databaseProvider = context.Configuration.UseSqlServer
+                ? "SqlConnection"
+                : "Sqlite";
+            createApiModel.DatabaseProvider = databaseProvider;
+            createApiModel.ConnectionString = context.SqlServerRunningContext?.ConnectionString;
+            createApiModel.RequestUrlHost = string.Empty;
+            editModel.RequestUrlHost = string.Empty;
+        }
 
         var apiClientSettings = CreateApiClientSettings(context, clientId, clientSecret);
         using var tenantsApiClient = new TenantsApiClient(apiClientSettings);
@@ -97,10 +105,24 @@ public static class TestCaseUITestContextExtensions
                          $"//a[normalize-space(.) = 'Edit']"));
             context.Get(By.Name("ClientId")).GetAttribute("value").ShouldBe(apiClientSettings.ClientId);
         }
-        else
+        else if (isLocalTest)
         {
             await context.SignInDirectlyAsync();
         }
+        else
+        {
+            var loginPage = await context.GoToLoginPageAsync();
+            await loginPage.LogInWithAsync(
+                context,
+                TestConfigurationManager.GetConfiguration("UserName", DefaultUser.UserName),
+                TestConfigurationManager.GetConfiguration("Password", DefaultUser.Password));
+
+            loginPage.ShouldLeaveLoginPage();
+        }
+
+        // Ensure that the tenant does not exist before starting the tests.
+        await tenantsApiClient.OrchardCoreApi.DisableAsync(editModel.Name);
+        await tenantsApiClient.OrchardCoreApi.RemoveAsync(editModel.Name);
 
         await TestTenantCreateAsync(context, tenantsApiClient, createApiModel);
         await TestTenantSetupAsync(context, tenantsApiClient, createApiModel, setupApiModel);
@@ -156,8 +178,11 @@ public static class TestCaseUITestContextExtensions
         context.Get(By.CssSelector("#RecipeName option[selected]")).Text
             .ShouldBe(createApiModel.RecipeName);
 
-        context.Get(By.CssSelector("#DatabaseProvider option[selected]")).GetValue()
-            .ShouldBe(createApiModel.DatabaseProvider);
+        if (createApiModel.DatabaseProvider != null)
+        {
+            context.Get(By.CssSelector("#DatabaseProvider option[selected]")).GetValue()
+                .ShouldBe(createApiModel.DatabaseProvider);
+        }
 
         if (createApiModel.FeatureProfiles != null)
         {
@@ -176,7 +201,20 @@ public static class TestCaseUITestContextExtensions
     {
         await apiClient.OrchardCoreApi.SetupAsync(setupApiModel);
 
-        await context.GoToRelativeUrlAsync(createApiModel.RequestUrlPrefix);
+        if (createApiModel.RequestUrlHost != null)
+        {
+            var uriBuilder = new UriBuilder
+            {
+                Scheme = "https",
+                Host = createApiModel.RequestUrlHost,
+                Path = createApiModel.RequestUrlPrefix,
+            };
+            await context.GoToAbsoluteUrlAsync(uriBuilder.Uri);
+        }
+        else
+        {
+            await context.GoToRelativeUrlAsync(createApiModel.RequestUrlPrefix);
+        }
 
         context.Exists(By.LinkText(setupApiModel.SiteName));
         context.Missing(By.ClassName("validation-summary-errors"));
@@ -220,6 +258,7 @@ public static class TestCaseUITestContextExtensions
     {
         await apiClient.OrchardCoreApi.DisableAsync(editModel.Name);
         await context.GoToAdminRelativeUrlAsync("/Tenants");
+        await context.FilterOnAdminTenantsPageAsync(editModel.Name);
         context.Exists(By.XPath($"//a[contains(., 'Enable') and contains(@href, '{editModel.Name}')]"));
 
         context.Configuration.TestOutputHelper.WriteLine("Disabling the tenant succeeded.");
@@ -232,6 +271,7 @@ public static class TestCaseUITestContextExtensions
     {
         await apiClient.OrchardCoreApi.RemoveAsync(editModel.Name);
         await context.GoToAdminRelativeUrlAsync("/Tenants", onlyIfNotAlreadyThere: false);
+        await context.FilterOnAdminTenantsPageAsync(editModel.Name);
         context.Missing(By.LinkText(editModel.Name));
 
         context.Configuration.TestOutputHelper.WriteLine("Removing the tenant succeeded.");
@@ -297,7 +337,20 @@ public static class TestCaseUITestContextExtensions
         TenantSetupApiModel setupApiModel)
     {
         // Intentionally not switching tenants because API requests need to continue to go to the Default tenant.
-        await context.GoToRelativeUrlAsync(apiModel.RequestUrlPrefix, onlyIfNotAlreadyThere: false);
+        if (apiModel.RequestUrlHost != null)
+        {
+            var uriBuilder = new UriBuilder
+            {
+                Scheme = "https",
+                Host = apiModel.RequestUrlHost,
+                Path = apiModel.RequestUrlPrefix,
+            };
+            await context.GoToAbsoluteUrlAsync(uriBuilder.Uri);
+        }
+        else
+        {
+            await context.GoToRelativeUrlAsync(apiModel.RequestUrlPrefix, onlyIfNotAlreadyThere: false);
+        }
 
         context.Get(By.ClassName("navbar-brand")).Text
             .ShouldBe(setupApiModel.SiteName);
