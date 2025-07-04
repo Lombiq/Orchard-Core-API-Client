@@ -35,7 +35,8 @@ public static class TestCaseUITestContextExtensions
         string clientId = null,
         string clientSecret = null,
         string featureProfile = null,
-        string requestUrlHost = null)
+        string requestUrlHost = null,
+        Func<UITestContext, TenantApiModel, TenantSetupApiModel, Task> stepsInTenantContext = null)
     {
         const string tenantName = "UITestTenantForOrchardCoreApiClientBehavior";
         const string prefix = "uitesttenantfororchardcoreapiclientbehavior";
@@ -118,6 +119,33 @@ public static class TestCaseUITestContextExtensions
 
         await TestTenantCreateAsync(context, tenantsApiClient, createApiModel, isLocalTest);
         await TestTenantSetupAsync(context, tenantsApiClient, createApiModel, setupApiModel);
+
+        // If there are additional steps to execute in the tenant context, do that now.
+        if (stepsInTenantContext != null)
+        {
+            // Switch to the tenant context.
+            if (string.IsNullOrEmpty(createApiModel.RequestUrlHost))
+            {
+                context.SwitchCurrentTenant(createApiModel.Name, createApiModel.RequestUrlPrefix);
+            }
+            else
+            {
+                var uriBuilder = new UriBuilder
+                {
+                    Scheme = "https",
+                    Host = createApiModel.RequestUrlHost,
+                    Path = createApiModel.RequestUrlPrefix,
+                };
+                context.SwitchCurrentTenant(createApiModel.Name, uriBuilder.Uri);
+            }
+
+            // Execute additional steps in the tenant context.
+            await stepsInTenantContext(context, createApiModel, setupApiModel);
+
+            // Switch back to the Default tenant.
+            context.SwitchCurrentTenantToDefault();
+        }
+
         await TestTenantEditAsync(context, tenantsApiClient, editModel, setupApiModel, isLocalTest);
         await TestTenantDisableAsync(context, tenantsApiClient, editModel, isLocalTest);
 
