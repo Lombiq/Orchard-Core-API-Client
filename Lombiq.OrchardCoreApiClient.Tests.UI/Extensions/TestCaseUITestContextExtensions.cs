@@ -147,6 +147,27 @@ public static class TestCaseUITestContextExtensions
         await TestContentRemoveAsync(context, contentsApiClient, taxonomy);
     }
 
+    public static async Task GoToTenantLandingPageAsync(
+        this UITestContext context,
+        string requestUrlPrefix,
+        string requestUrlHost = null)
+    {
+        if (!string.IsNullOrEmpty(requestUrlHost))
+        {
+            var uriBuilder = new UriBuilder
+            {
+                Scheme = "https",
+                Host = requestUrlHost,
+                Path = requestUrlPrefix,
+            };
+            await context.GoToAbsoluteUrlAsync(uriBuilder.Uri, onlyIfNotAlreadyThere: false);
+        }
+        else
+        {
+            await context.GoToRelativeUrlAsync(requestUrlPrefix, onlyIfNotAlreadyThere: false);
+        }
+    }
+
     private static async Task TestTenantCreateAsync(
         UITestContext context,
         TenantsApiClient apiClient,
@@ -197,20 +218,7 @@ public static class TestCaseUITestContextExtensions
     {
         await apiClient.OrchardCoreApi.SetupAsync(setupApiModel);
 
-        if (createApiModel.RequestUrlHost != null)
-        {
-            var uriBuilder = new UriBuilder
-            {
-                Scheme = "https",
-                Host = createApiModel.RequestUrlHost,
-                Path = createApiModel.RequestUrlPrefix,
-            };
-            await context.GoToAbsoluteUrlAsync(uriBuilder.Uri);
-        }
-        else
-        {
-            await context.GoToRelativeUrlAsync(createApiModel.RequestUrlPrefix);
-        }
+        await context.GoToTenantLandingPageAsync(createApiModel.RequestUrlPrefix, createApiModel.RequestUrlHost);
 
         context.Exists(By.LinkText(setupApiModel.SiteName));
         context.Missing(By.ClassName("validation-summary-errors"));
@@ -246,13 +254,7 @@ public static class TestCaseUITestContextExtensions
             await GoToTenantEditorAndAssertCommonTenantFieldsAsync(context, editModel);
         }
 
-        var uriBuilder = new UriBuilder
-        {
-            Scheme = "https",
-            Host = originalHost,
-            Path = originalPrefix,
-        };
-        await context.GoToAbsoluteUrlAsync(uriBuilder.Uri, onlyIfNotAlreadyThere: false);
+        await context.GoToTenantLandingPageAsync(originalPrefix, originalHost);
 
         context.Missing(By.ClassName("navbar-brand"));
 
@@ -279,17 +281,11 @@ public static class TestCaseUITestContextExtensions
         if (checkOnAdmin)
         {
             await context.GoToAdminRelativeUrlAsync("/Tenants");
-            await context.FilterOnAdminTenantsPageAsync(editModel.Name);
+            await context.FilterOnAdminWithSearchBoxAsync(editModel.Name);
             context.Exists(By.XPath($"//a[contains(., 'Enable') and contains(@href, '{editModel.Name}')]"));
         }
 
-        var uriBuilder = new UriBuilder
-        {
-            Scheme = "https",
-            Host = editModel.RequestUrlHost,
-            Path = editModel.RequestUrlPrefix,
-        };
-        await context.GoToAbsoluteUrlAsync(uriBuilder.Uri, onlyIfNotAlreadyThere: false);
+        await context.GoToTenantLandingPageAsync(editModel.RequestUrlPrefix, editModel.RequestUrlHost);
 
         context.Missing(By.ClassName("navbar-brand"));
 
@@ -306,17 +302,11 @@ public static class TestCaseUITestContextExtensions
         if (checkOnAdmin)
         {
             await context.GoToAdminRelativeUrlAsync("/Tenants", onlyIfNotAlreadyThere: false);
-            await context.FilterOnAdminTenantsPageAsync(editModel.Name);
+            await context.FilterOnAdminWithSearchBoxAsync(editModel.Name);
             context.Missing(By.LinkText(editModel.Name));
         }
 
-        var uriBuilder = new UriBuilder
-        {
-            Scheme = "https",
-            Host = editModel.RequestUrlHost,
-            Path = editModel.RequestUrlPrefix,
-        };
-        await context.GoToAbsoluteUrlAsync(uriBuilder.Uri, onlyIfNotAlreadyThere: false);
+        await context.GoToTenantLandingPageAsync(editModel.RequestUrlPrefix, editModel.RequestUrlHost);
 
         context.Missing(By.ClassName("navbar-brand"));
 
@@ -383,20 +373,7 @@ public static class TestCaseUITestContextExtensions
         TenantSetupApiModel setupApiModel)
     {
         // Intentionally not switching tenants because API requests need to continue to go to the Default tenant.
-        if (apiModel.RequestUrlHost != null)
-        {
-            var uriBuilder = new UriBuilder
-            {
-                Scheme = "https",
-                Host = apiModel.RequestUrlHost,
-                Path = apiModel.RequestUrlPrefix,
-            };
-            await context.GoToAbsoluteUrlAsync(uriBuilder.Uri, onlyIfNotAlreadyThere: false);
-        }
-        else
-        {
-            await context.GoToRelativeUrlAsync(apiModel.RequestUrlPrefix, onlyIfNotAlreadyThere: false);
-        }
+        await context.GoToTenantLandingPageAsync(apiModel.RequestUrlPrefix, apiModel.RequestUrlHost);
 
         context.Get(By.ClassName("navbar-brand")).Text
             .ShouldBe(setupApiModel.SiteName);
