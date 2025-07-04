@@ -37,8 +37,8 @@ public static class TestCaseUITestContextExtensions
         string featureProfile = null,
         string requestUrlHost = null)
     {
-        const string tenantName = "UITestTenant";
-        const string prefix = "uitesttenant";
+        const string tenantName = "UITestTenantForOrchardCoreApiClientBehavior";
+        const string prefix = "uitesttenantfororchardcoreapiclientbehavior";
 
         var createApiModel = new TenantApiModel
         {
