@@ -281,8 +281,11 @@ public static class TestCaseUITestContextExtensions
         {
             await GoToTenantEditorAndAssertCommonTenantFieldsAsync(context, editModel);
         }
+        else
+        {
+            await context.GoToTenantLandingPageAsync(originalPrefix, originalHost);
+        }
 
-        await context.GoToTenantLandingPageAsync(originalPrefix, originalHost);
 
         context.Missing(By.ClassName("navbar-brand"));
 
