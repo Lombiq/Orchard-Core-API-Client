@@ -286,7 +286,6 @@ public static class TestCaseUITestContextExtensions
             await context.GoToTenantLandingPageAsync(originalPrefix, originalHost);
         }
 
-
         context.Missing(By.ClassName("navbar-brand"));
 
         editModel.RequestUrlPrefix = originalPrefix;
