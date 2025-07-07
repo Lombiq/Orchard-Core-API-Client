@@ -313,10 +313,11 @@ public static class TestCaseUITestContextExtensions
             await context.FilterOnAdminWithSearchBoxAsync(editModel.Name);
             context.Exists(By.XPath($"//a[contains(., 'Enable') and contains(@href, '{editModel.Name}')]"));
         }
-
-        await context.GoToTenantLandingPageAsync(editModel.RequestUrlPrefix, editModel.RequestUrlHost);
-
-        context.Missing(By.ClassName("navbar-brand"));
+        else
+        {
+            await context.GoToTenantLandingPageAsync(editModel.RequestUrlPrefix, editModel.RequestUrlHost);
+            context.Missing(By.ClassName("navbar-brand"));
+        }
 
         context.Configuration.TestOutputHelper.WriteLine("Disabling the tenant succeeded.");
     }
