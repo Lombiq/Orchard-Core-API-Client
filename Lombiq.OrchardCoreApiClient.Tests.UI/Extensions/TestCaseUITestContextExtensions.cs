@@ -335,10 +335,11 @@ public static class TestCaseUITestContextExtensions
             await context.FilterOnAdminWithSearchBoxAsync(editModel.Name);
             context.Missing(By.LinkText(editModel.Name));
         }
-
-        await context.GoToTenantLandingPageAsync(editModel.RequestUrlPrefix, editModel.RequestUrlHost);
-
-        context.Missing(By.ClassName("navbar-brand"));
+        else
+        {
+            await context.GoToTenantLandingPageAsync(editModel.RequestUrlPrefix, editModel.RequestUrlHost);
+            context.Missing(By.ClassName("navbar-brand"));
+        }
 
         context.Configuration.TestOutputHelper.WriteLine("Removing the tenant succeeded.");
     }
