@@ -79,8 +79,10 @@ public static class TestCaseUITestContextExtensions
             Category = "UI Test Tenants - Edited",
         };
 
+        var isLocalTest = context.IsLocaleUITest();
+
         // If the RequestUrlPrefix is not empty or not set we assume we don't want to change it, so we just append "edited" to the RequestUrlHost.
-        if (string.IsNullOrEmpty(apiClientBehaviorTestModel.RequestUrlPrefix))
+        if (string.IsNullOrEmpty(apiClientBehaviorTestModel.RequestUrlPrefix) && !isLocalTest)
         {
             editModel.RequestUrlPrefix = apiClientBehaviorTestModel.RequestUrlPrefix;
 
@@ -92,8 +94,6 @@ public static class TestCaseUITestContextExtensions
             editModel.RequestUrlPrefix = technicalName + "edited";
             editModel.RequestUrlHost = apiClientBehaviorTestModel.RequestUrlHost;
         }
-
-        var isLocalTest = context.IsLocaleUITest();
 
         // In case of remote tests these values can be different, or coming from environment variables.
         if (isLocalTest)
