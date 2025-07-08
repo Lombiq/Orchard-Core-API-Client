@@ -224,7 +224,6 @@ public static class TestCaseUITestContextExtensions
         bool checkOnAdmin)
     {
         context.Configuration.TestOutputHelper.WriteLine("Creating the tenant...");
-        context.Configuration.TestOutputHelper.WriteLine("With the following model: " + JsonSerializer.Serialize(createApiModel));
         using (var response = await apiClient.OrchardCoreApi.CreateAsync(createApiModel))
         {
             await context.AssertLogsAsync();
