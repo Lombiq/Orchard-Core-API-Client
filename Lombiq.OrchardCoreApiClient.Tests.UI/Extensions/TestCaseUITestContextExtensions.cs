@@ -1,6 +1,7 @@
 using Atata;
 using Lombiq.OrchardCoreApiClient.Clients;
 using Lombiq.OrchardCoreApiClient.Models;
+using Lombiq.OrchardCoreApiClient.Tests.UI.Models;
 using Lombiq.Tests.UI.Constants;
 using Lombiq.Tests.UI.Extensions;
 using Lombiq.Tests.UI.Services;
@@ -26,51 +27,57 @@ public static class TestCaseUITestContextExtensions
         string clientSecret = null,
         string featureProfile = null)
     {
-        await context.TestTenantsOrchardCoreApiClientBehaviorAsync(clientId, clientSecret, featureProfile);
+        await context.TestTenantsOrchardCoreApiClientBehaviorAsync(
+            new ApiClientBehaviorTestModel
+            {
+                ClientId = clientId,
+                ClientSecret = clientSecret,
+                FeatureProfile = featureProfile,
+            });
         await context.TestContentsOrchardCoreApiClientBehaviorAsync(clientId, clientSecret);
     }
 
     public static async Task TestTenantsOrchardCoreApiClientBehaviorAsync(
         this UITestContext context,
-        string clientId = null,
-        string clientSecret = null,
-        string featureProfile = null,
-        string requestUrlHost = null,
-        Func<UITestContext, TenantApiModel, TenantSetupApiModel, Task> stepsInTenantContext = null)
+        ApiClientBehaviorTestModel apiClientBehaviorTestModel)
     {
-        const string tenantName = "UITestTenantForOrchardCoreApiClientBehavior";
-        const string prefix = "uitesttenantfororchardcoreapiclientbehavior";
+        // Tenant technical name must be lowercase, so we convert it here.
+#pragma warning disable CA1308 // CA1308: Replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
+        var technicalName = apiClientBehaviorTestModel.RequestUrlPrefix ?? apiClientBehaviorTestModel.TenantName.ToLowerInvariant();
+#pragma warning restore CA1308
 
         var createApiModel = new TenantApiModel
         {
             Description = "Tenant created by UI test",
-            Name = tenantName,
-            RequestUrlPrefix = prefix,
-            RequestUrlHost = requestUrlHost,
-            TablePrefix = prefix,
+            Name = apiClientBehaviorTestModel.TenantName,
+            RequestUrlPrefix = technicalName,
+            RequestUrlHost = apiClientBehaviorTestModel.RequestUrlHost,
+            TablePrefix = technicalName,
             RecipeName = "Blog",
             Category = "UI Test Tenants",
-            FeatureProfiles = string.IsNullOrEmpty(featureProfile) ? null : new[] { featureProfile },
+            FeatureProfiles = string.IsNullOrEmpty(apiClientBehaviorTestModel.FeatureProfile)
+                ? null
+                : new[] { apiClientBehaviorTestModel.FeatureProfile },
         };
 
         var setupApiModel = new TenantSetupApiModel
         {
-            Name = tenantName,
+            Name = apiClientBehaviorTestModel.TenantName,
             RecipeName = "Blog",
             UserName = DefaultUser.UserName,
             Email = DefaultUser.Email,
             Password = DefaultUser.Password,
             SiteName = "UI Test Tenant Site",
             SiteTimeZone = "Europe/Budapest",
-            TablePrefix = prefix,
+            TablePrefix = technicalName,
         };
 
         var editModel = new TenantApiModel
         {
             Description = "Tenant edited by UI test",
-            Name = tenantName,
-            RequestUrlPrefix = prefix + "edited",
-            RequestUrlHost = requestUrlHost,
+            Name = apiClientBehaviorTestModel.TenantName,
+            RequestUrlPrefix = technicalName + "edited",
+            RequestUrlHost = apiClientBehaviorTestModel.RequestUrlHost,
             Category = "UI Test Tenants - Edited",
         };
 
@@ -89,10 +96,10 @@ public static class TestCaseUITestContextExtensions
             editModel.RequestUrlHost = string.Empty;
         }
 
-        var apiClientSettings = CreateApiClientSettings(context, clientId, clientSecret);
+        var apiClientSettings = CreateApiClientSettings(context, apiClientBehaviorTestModel.ClientId, apiClientBehaviorTestModel.ClientSecret);
         using var tenantsApiClient = new TenantsApiClient(apiClientSettings);
 
-        var isDefaultClient = string.IsNullOrEmpty(clientId);
+        var isDefaultClient = string.IsNullOrEmpty(apiClientBehaviorTestModel.ClientId);
 
         const string defaultClientRecipe = "Lombiq.OrchardCoreApiClient.Tests.UI.OpenId";
         context.Scope.AtataContext.Log.Info($"Executing the default client recipe \"{defaultClientRecipe}\": {isDefaultClient}");
@@ -122,7 +129,7 @@ public static class TestCaseUITestContextExtensions
         await TestTenantSetupAsync(context, tenantsApiClient, createApiModel, setupApiModel);
 
         // If there are additional steps to execute in the tenant context, do that now.
-        if (stepsInTenantContext != null)
+        if (apiClientBehaviorTestModel.StepsInTenantContext != null)
         {
             context.Configuration.TestOutputHelper.WriteLine("Executing additional steps in the tenant context...");
             // Switch to the tenant context.
@@ -142,7 +149,7 @@ public static class TestCaseUITestContextExtensions
             }
 
             // Execute additional steps in the tenant context.
-            await stepsInTenantContext(context, createApiModel, setupApiModel);
+            await apiClientBehaviorTestModel.StepsInTenantContext(context, createApiModel, setupApiModel);
 
             // Switch back to the Default tenant.
             context.SwitchCurrentTenantToDefault();
