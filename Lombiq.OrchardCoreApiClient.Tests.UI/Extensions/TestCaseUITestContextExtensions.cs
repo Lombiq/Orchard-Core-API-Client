@@ -210,6 +210,8 @@ public static class TestCaseUITestContextExtensions
         TenantApiModel createApiModel,
         bool checkOnAdmin)
     {
+        context.Configuration.TestOutputHelper.WriteLine("Creating the tenant...");
+        context.Configuration.TestOutputHelper.WriteLine("With the following model: " + JsonSerializer.Serialize(createApiModel));
         using (var response = await apiClient.OrchardCoreApi.CreateAsync(createApiModel))
         {
             await context.AssertLogsAsync();
@@ -256,7 +258,12 @@ public static class TestCaseUITestContextExtensions
         TenantSetupApiModel setupApiModel)
     {
         context.Configuration.TestOutputHelper.WriteLine("Initiating tenant setup...");
-        await apiClient.OrchardCoreApi.SetupAsync(setupApiModel);
+        using (var response = await apiClient.OrchardCoreApi.SetupAsync(setupApiModel))
+        {
+            response.Error.ShouldBeNull(
+                $"Tenant setup failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
+                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+        }
 
         context.Configuration.TestOutputHelper.WriteLine("Now going to the tenant landing page to assert the setup.");
 
