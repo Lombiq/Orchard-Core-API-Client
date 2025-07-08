@@ -298,7 +298,13 @@ public static class TestCaseUITestContextExtensions
         bool checkOnAdmin)
     {
         context.Configuration.TestOutputHelper.WriteLine("Editing the tenant...");
-        await apiClient.OrchardCoreApi.EditAsync(editModel);
+        using (var response = await apiClient.OrchardCoreApi.EditAsync(editModel))
+        {
+            response.Error.ShouldBeNull(
+                $"Tenant edit failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
+                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+        }
+
         if (checkOnAdmin)
         {
             await GoToTenantEditorAndAssertCommonTenantFieldsAsync(context, editModel);
@@ -342,7 +348,14 @@ public static class TestCaseUITestContextExtensions
         bool checkOnAdmin)
     {
         context.Configuration.TestOutputHelper.WriteLine("Disabling the tenant...");
-        await apiClient.OrchardCoreApi.DisableAsync(editModel.Name);
+
+        using (var response = await apiClient.OrchardCoreApi.DisableAsync(editModel.Name))
+        {
+            response.Error.ShouldBeNull(
+                $"Tenant disable failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
+                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+        }
+
         if (checkOnAdmin)
         {
             await context.GoToAdminRelativeUrlAsync("/Tenants");
@@ -365,7 +378,14 @@ public static class TestCaseUITestContextExtensions
         bool checkOnAdmin)
     {
         context.Configuration.TestOutputHelper.WriteLine("Removing the tenant...");
-        await apiClient.OrchardCoreApi.RemoveAsync(editModel.Name);
+
+        using (var response = await apiClient.OrchardCoreApi.RemoveAsync(editModel.Name))
+        {
+            response.Error.ShouldBeNull(
+                $"Tenant remove failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
+                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+        }
+
         if (checkOnAdmin)
         {
             await context.GoToAdminRelativeUrlAsync("/Tenants", onlyIfNotAlreadyThere: false);
