@@ -43,14 +43,14 @@ public static class TestCaseUITestContextExtensions
     {
         // Tenant technical name must be lowercase, so we convert it here.
 #pragma warning disable CA1308 // CA1308: Replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
-        var technicalName = apiClientBehaviorTestModel.RequestUrlPrefix ?? apiClientBehaviorTestModel.TenantName.ToLowerInvariant();
+        var technicalName = apiClientBehaviorTestModel.TenantName.ToLowerInvariant();
 #pragma warning restore CA1308
 
         var createApiModel = new TenantApiModel
         {
             Description = "Tenant created by UI test",
             Name = apiClientBehaviorTestModel.TenantName,
-            RequestUrlPrefix = technicalName,
+            RequestUrlPrefix = apiClientBehaviorTestModel.RequestUrlPrefix ?? technicalName,
             RequestUrlHost = apiClientBehaviorTestModel.RequestUrlHost,
             TablePrefix = technicalName,
             RecipeName = "Blog",
@@ -69,6 +69,7 @@ public static class TestCaseUITestContextExtensions
             Password = DefaultUser.Password,
             SiteName = "UI Test Tenant Site",
             SiteTimeZone = "Europe/Budapest",
+            TablePrefix = technicalName,
         };
 
         var editModel = new TenantApiModel
