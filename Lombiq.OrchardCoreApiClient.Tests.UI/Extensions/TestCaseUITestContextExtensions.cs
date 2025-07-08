@@ -83,7 +83,9 @@ public static class TestCaseUITestContextExtensions
         if (string.IsNullOrEmpty(apiClientBehaviorTestModel.RequestUrlPrefix))
         {
             editModel.RequestUrlPrefix = apiClientBehaviorTestModel.RequestUrlPrefix;
-            editModel.RequestUrlHost = apiClientBehaviorTestModel.RequestUrlHost + "edited";
+
+            // Must be preceded by "edited" to ensure it does not affect subdomains e.g. "editedTestTenant.example.com".
+            editModel.RequestUrlHost = "edited" + apiClientBehaviorTestModel.RequestUrlHost;
         }
         else
         {
