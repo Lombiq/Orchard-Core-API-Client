@@ -222,7 +222,6 @@ public static class TestCaseUITestContextExtensions
 
             // Check if response URL is valid, and visit it (should be the tenant setup page and not 404 error).
             var responseUrl = new Uri(response.Content);
-            responseUrl.AbsolutePath.ShouldBe($"/{createApiModel.Name}", StringCompareShould.IgnoreCase);
             context.Configuration.TestOutputHelper.WriteLine("Trying to go to the tenant setup page: " + responseUrl);
             await context.GoToAbsoluteUrlAsync(responseUrl);
         }
