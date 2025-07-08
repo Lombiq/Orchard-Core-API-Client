@@ -69,7 +69,6 @@ public static class TestCaseUITestContextExtensions
             Password = DefaultUser.Password,
             SiteName = "UI Test Tenant Site",
             SiteTimeZone = "Europe/Budapest",
-            TablePrefix = technicalName,
         };
 
         var editModel = new TenantApiModel
