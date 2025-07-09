@@ -79,7 +79,7 @@ public static class TestCaseUITestContextExtensions
             Category = "UI Test Tenants - Edited",
         };
 
-        var isLocalTest = context.IsLocaleUITest();
+        var isLocalTest = context.IsLocalUITest();
 
         // If the RequestUrlPrefix is not empty or not set we assume we don't want to change it, so we just append "edited" to the RequestUrlHost.
         if (string.IsNullOrEmpty(apiClientBehaviorTestModel.RequestUrlPrefix) && !isLocalTest)
