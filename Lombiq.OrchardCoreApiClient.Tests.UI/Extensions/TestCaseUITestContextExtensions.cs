@@ -98,7 +98,7 @@ public static class TestCaseUITestContextExtensions
         // In case of remote tests these values can be different, or coming from environment variables.
         if (isLocalTest)
         {
-            context.Configuration.TestOutputHelper.WriteLine("Using locale test settings for creating tenant.");
+            context.Configuration.TestOutputHelper.WriteLine("Using local test settings for creating tenant.");
             var databaseProvider = context.Configuration.UseSqlServer
                 ? "SqlConnection"
                 : "Sqlite";
