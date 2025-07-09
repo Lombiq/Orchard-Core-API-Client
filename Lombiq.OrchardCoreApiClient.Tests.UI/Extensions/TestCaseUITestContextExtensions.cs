@@ -144,6 +144,7 @@ public static class TestCaseUITestContextExtensions
         if (apiClientBehaviorTestModel.StepsInTenantContext != null)
         {
             context.Configuration.TestOutputHelper.WriteLine("Executing additional steps in the tenant context...");
+
             // Switch to the tenant context.
             if (string.IsNullOrEmpty(createApiModel.RequestUrlHost))
             {
