@@ -98,7 +98,7 @@ public static class TestCaseUITestContextExtensions
         // In case of remote tests these values can be different, or coming from environment variables.
         if (isLocalTest)
         {
-            context.Configuration.TestOutputHelper.WriteLine("Using locale test settings for creating tenant.");
+            context.Configuration.TestOutputHelper.WriteLine("Using local test settings for creating tenant.");
             var databaseProvider = context.Configuration.UseSqlServer
                 ? "SqlConnection"
                 : "Sqlite";
@@ -144,6 +144,7 @@ public static class TestCaseUITestContextExtensions
         if (apiClientBehaviorTestModel.StepsInTenantContext != null)
         {
             context.Configuration.TestOutputHelper.WriteLine("Executing additional steps in the tenant context...");
+
             // Switch to the tenant context.
             if (string.IsNullOrEmpty(createApiModel.RequestUrlHost))
             {
@@ -165,7 +166,7 @@ public static class TestCaseUITestContextExtensions
 
             // Switch back to the Default tenant.
             context.SwitchCurrentTenantToDefault();
-            context.Configuration.TestOutputHelper.WriteLine("Additional steps in the tenant context was done.");
+            context.Configuration.TestOutputHelper.WriteLine("Additional steps in the tenant context were done.");
         }
 
         await TestTenantEditAsync(context, tenantsApiClient, editModel, setupApiModel, isLocalTest);
