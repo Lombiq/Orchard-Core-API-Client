@@ -166,7 +166,7 @@ public static class TestCaseUITestContextExtensions
 
             // Switch back to the Default tenant.
             context.SwitchCurrentTenantToDefault();
-            context.Configuration.TestOutputHelper.WriteLine("Additional steps in the tenant context was done.");
+            context.Configuration.TestOutputHelper.WriteLine("Additional steps in the tenant context were done.");
         }
 
         await TestTenantEditAsync(context, tenantsApiClient, editModel, setupApiModel, isLocalTest);
