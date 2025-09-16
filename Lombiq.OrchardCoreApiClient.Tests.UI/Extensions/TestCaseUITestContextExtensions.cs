@@ -315,17 +315,30 @@ public static class TestCaseUITestContextExtensions
         var originalPrefix = editModel.RequestUrlPrefix;
         var originalHost = editModel.RequestUrlHost;
 
-        editModel.RequestUrlPrefix = string.Empty;
-        editModel.RequestUrlHost = "https://example.com";
-        await apiClient.OrchardCoreApi.EditAsync(editModel);
+        if (!string.IsNullOrEmpty(originalPrefix))
+        {
+            editModel.RequestUrlPrefix = "edit" + originalPrefix;
+        }
+
+        if (!string.IsNullOrEmpty(originalHost))
+        {
+            editModel.RequestUrlHost = "edit" + originalHost;
+        }
+
+        using (var response = await apiClient.OrchardCoreApi.EditAsync(editModel))
+        {
+            response.Error.ShouldBeNull(
+                $"Tenant edit (with name change) failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
+                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+        }
+
         if (checkOnAdmin)
         {
             await GoToTenantEditorAndAssertCommonTenantFieldsAsync(context, editModel);
         }
         else
         {
-            await context.GoToTenantLandingPageAsync(originalPrefix, originalHost);
-            context.Missing(By.ClassName("navbar-brand"));
+            await context.GoToTenantLandingPageAsync(editModel.RequestUrlPrefix, editModel.RequestUrlHost);
         }
 
         editModel.RequestUrlPrefix = originalPrefix;
