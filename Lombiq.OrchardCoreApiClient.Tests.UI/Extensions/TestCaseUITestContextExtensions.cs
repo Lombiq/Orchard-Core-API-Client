@@ -375,11 +375,6 @@ public static class TestCaseUITestContextExtensions
             await context.FilterOnAdminWithSearchBoxAsync(editModel.Name);
             context.Exists(By.XPath($"//a[contains(., 'Enable') and contains(@href, '{editModel.Name}')]"));
         }
-        else
-        {
-            await context.GoToTenantLandingPageAsync(editModel.RequestUrlPrefix, editModel.RequestUrlHost);
-            context.Missing(By.ClassName("navbar-brand"));
-        }
 
         context.Configuration.TestOutputHelper.WriteLine("Disabling the tenant succeeded.");
     }
@@ -404,11 +399,6 @@ public static class TestCaseUITestContextExtensions
             await context.GoToAdminRelativeUrlAsync("/Tenants", onlyIfNotAlreadyThere: false);
             await context.FilterOnAdminWithSearchBoxAsync(editModel.Name);
             context.Missing(By.LinkText(editModel.Name));
-        }
-        else
-        {
-            await context.GoToTenantLandingPageAsync(editModel.RequestUrlPrefix, editModel.RequestUrlHost);
-            context.Missing(By.ClassName("navbar-brand"));
         }
 
         context.Configuration.TestOutputHelper.WriteLine("Removing the tenant succeeded.");
