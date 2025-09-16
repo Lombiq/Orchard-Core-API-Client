@@ -319,8 +319,7 @@ public static class TestCaseUITestContextExtensions
         {
             editModel.RequestUrlPrefix = "edit" + originalPrefix;
         }
-
-        if (!string.IsNullOrEmpty(originalHost))
+        else
         {
             editModel.RequestUrlHost = "edit" + originalHost;
         }
