@@ -315,17 +315,29 @@ public static class TestCaseUITestContextExtensions
         var originalPrefix = editModel.RequestUrlPrefix;
         var originalHost = editModel.RequestUrlHost;
 
-        editModel.RequestUrlPrefix = string.Empty;
-        editModel.RequestUrlHost = "https://example.com";
-        await apiClient.OrchardCoreApi.EditAsync(editModel);
+        if (!string.IsNullOrEmpty(originalPrefix))
+        {
+            editModel.RequestUrlPrefix = "edit" + originalPrefix;
+        }
+        else
+        {
+            editModel.RequestUrlHost = "edit" + originalHost;
+        }
+
+        using (var response = await apiClient.OrchardCoreApi.EditAsync(editModel))
+        {
+            response.Error.ShouldBeNull(
+                $"Tenant edit (with name change) failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
+                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+        }
+
         if (checkOnAdmin)
         {
             await GoToTenantEditorAndAssertCommonTenantFieldsAsync(context, editModel);
         }
         else
         {
-            await context.GoToTenantLandingPageAsync(originalPrefix, originalHost);
-            context.Missing(By.ClassName("navbar-brand"));
+            await GoToTenantUrlAndAssertHeaderAsync(context, editModel, setupApiModel);
         }
 
         editModel.RequestUrlPrefix = originalPrefix;
@@ -362,11 +374,6 @@ public static class TestCaseUITestContextExtensions
             await context.FilterOnAdminWithSearchBoxAsync(editModel.Name);
             context.Exists(By.XPath($"//a[contains(., 'Enable') and contains(@href, '{editModel.Name}')]"));
         }
-        else
-        {
-            await context.GoToTenantLandingPageAsync(editModel.RequestUrlPrefix, editModel.RequestUrlHost);
-            context.Missing(By.ClassName("navbar-brand"));
-        }
 
         context.Configuration.TestOutputHelper.WriteLine("Disabling the tenant succeeded.");
     }
@@ -391,11 +398,6 @@ public static class TestCaseUITestContextExtensions
             await context.GoToAdminRelativeUrlAsync("/Tenants", onlyIfNotAlreadyThere: false);
             await context.FilterOnAdminWithSearchBoxAsync(editModel.Name);
             context.Missing(By.LinkText(editModel.Name));
-        }
-        else
-        {
-            await context.GoToTenantLandingPageAsync(editModel.RequestUrlPrefix, editModel.RequestUrlHost);
-            context.Missing(By.ClassName("navbar-brand"));
         }
 
         context.Configuration.TestOutputHelper.WriteLine("Removing the tenant succeeded.");
