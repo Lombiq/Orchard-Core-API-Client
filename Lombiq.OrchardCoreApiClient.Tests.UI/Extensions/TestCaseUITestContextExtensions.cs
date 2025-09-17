@@ -337,7 +337,7 @@ public static class TestCaseUITestContextExtensions
         }
         else
         {
-            await context.GoToTenantLandingPageAsync(editModel.RequestUrlPrefix, editModel.RequestUrlHost);
+            await GoToTenantUrlAndAssertHeaderAsync(context, editModel, setupApiModel);
         }
 
         editModel.RequestUrlPrefix = originalPrefix;
