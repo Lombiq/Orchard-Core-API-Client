@@ -13,7 +13,6 @@ using OrchardCore.Taxonomies.Models;
 using Shouldly;
 using System;
 using System.Linq;
-using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Xunit;
@@ -390,32 +389,14 @@ public static class TestCaseUITestContextExtensions
     {
         context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Removing the tenant...");
 
-        var tryCount = 0;
-
         await ReliabilityHelper.DoWithRetriesOrFailAsync(
             async () =>
             {
-                tryCount++;
-
                 using var response = await apiClient.OrchardCoreApi.RemoveAsync(editModel.Name);
-
-                // For some reason the response can be null sometimes. Not clear why. We need to retry since the result
-                // can't be determined.
-                if (response == null)
-                {
-                    return false;
-                }
-
-                // A second try after a successful removal will yield a 404, which is expected. We can only get here if
-                // the first attempt was successful but yielded a null response but was successful.
-                if (tryCount > 1 && response.StatusCode == HttpStatusCode.NotFound)
-                {
-                    return true;
-                }
 
                 // The tenant can remain running for a while even after having been disabled. Waiting a bit here to see
                 // if it gets unstuck.
-                if (response.StatusCode == HttpStatusCode.BadRequest &&
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest &&
                     response.Content.Contains($"The tenant '{editModel.Name}' should be 'Disabled' or 'Uninitialized'."))
                 {
                     context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug(
