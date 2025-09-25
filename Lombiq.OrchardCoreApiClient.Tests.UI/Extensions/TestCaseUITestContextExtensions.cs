@@ -397,7 +397,7 @@ public static class TestCaseUITestContextExtensions
                 // The tenant can remain running for a while even after having been disabled. Waiting a bit here to see
                 // if it gets unstuck.
                 if (response.StatusCode == System.Net.HttpStatusCode.BadRequest &&
-                    response.Content.Contains($"The tenant '{editModel.Name}' should be 'Disabled' or 'Uninitialized'."))
+                    response.Error?.Content?.Contains($"The tenant '{editModel.Name}' should be 'Disabled' or 'Uninitialized'.") == true)
                 {
                     context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug(
                         "The tenant is still running, despite being disabled, and thus can't be removed. Attempting again.");
