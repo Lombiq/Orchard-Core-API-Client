@@ -398,6 +398,9 @@ public static class TestCaseUITestContextExtensions
                 if (response.StatusCode == System.Net.HttpStatusCode.BadRequest &&
                     response.Content.Contains($"The tenant '{editModel.Name}' should be 'Disabled' or 'Uninitialized'."))
                 {
+                    context.Configuration.TestOutputHelper.WriteLine(
+                        "The tenant is still running, despite being disabled, and thus can't be removed. Attempting again.");
+
                     return false;
                 }
 
