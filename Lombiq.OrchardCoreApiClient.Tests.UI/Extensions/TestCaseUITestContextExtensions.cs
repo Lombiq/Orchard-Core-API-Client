@@ -391,7 +391,7 @@ public static class TestCaseUITestContextExtensions
         await ReliabilityHelper.DoWithRetriesOrFailAsync(
             async () =>
             {
-                var response = await apiClient.OrchardCoreApi.RemoveAsync(editModel.Name);
+                using var response = await apiClient.OrchardCoreApi.RemoveAsync(editModel.Name);
 
                 // The tenant can remain running for a while even after having been disabled. Waiting a bit here to see
                 // if it gets unstuck.
