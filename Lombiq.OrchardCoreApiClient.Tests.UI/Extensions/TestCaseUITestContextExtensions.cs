@@ -4,6 +4,7 @@ using Lombiq.OrchardCoreApiClient.Models;
 using Lombiq.OrchardCoreApiClient.Tests.UI.Models;
 using Lombiq.Tests.UI.Constants;
 using Lombiq.Tests.UI.Extensions;
+using Lombiq.Tests.UI.Helpers;
 using Lombiq.Tests.UI.Services;
 using OpenQA.Selenium;
 using OrchardCore.Autoroute.Models;
@@ -387,12 +388,28 @@ public static class TestCaseUITestContextExtensions
     {
         context.Configuration.TestOutputHelper.WriteLine("Removing the tenant...");
 
-        using (var response = await apiClient.OrchardCoreApi.RemoveAsync(editModel.Name))
-        {
-            response.Error.ShouldBeNull(
-                $"Tenant remove failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
-                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
-        }
+        await ReliabilityHelper.DoWithRetriesOrFailAsync(
+            async () =>
+            {
+                var response = await apiClient.OrchardCoreApi.RemoveAsync(editModel.Name);
+
+                // The tenant can remain running for a while even after having been disabled. Waiting a bit here to see
+                // if it gets unstuck.
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest &&
+                    response.Content.Contains($"The tenant '{editModel.Name}' should be 'Disabled' or 'Uninitialized'."))
+                {
+                    return false;
+                }
+
+                response.Error.ShouldBeNull(
+                    $"Tenant remove failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
+                    $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+
+                return true;
+            },
+            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(5),
+            context.Configuration.TestCancellationToken);
 
         if (checkOnAdmin)
         {
