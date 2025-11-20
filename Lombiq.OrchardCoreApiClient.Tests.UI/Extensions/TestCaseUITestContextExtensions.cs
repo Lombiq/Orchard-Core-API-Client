@@ -475,7 +475,7 @@ public static class TestCaseUITestContextExtensions
 
         await apiClient.OrchardCoreApi.RemoveAsync(contentItem.ContentItemId);
 
-        context.Refresh();
+        await context.RefreshAsync();
         context.Missing(By.XPath($"//a[contains(text(), '{contentItem.DisplayText}')]"));
     }
 
