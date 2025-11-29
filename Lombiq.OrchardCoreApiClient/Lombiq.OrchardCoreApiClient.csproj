@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <ImportLombiqHelpfulLibrariesRefit>true</ImportLombiqHelpfulLibrariesRefit>
+  </PropertyGroup>
+
   <Import Project="..\..\..\Utilities\Lombiq.MSBuild.Targets\Lombiq.MSBuild.Core.Targets\Lombiq.MSBuild.Core.Targets.props" />
 
   <PropertyGroup>
@@ -15,18 +19,6 @@
     <PackageReference Include="NodaTime" Version="3.2.2" />
     <PackageReference Include="Polly" Version="8.6.5" />
     <PackageReference Include="OrchardCore.ContentManagement.Abstractions" Version="$(OrchardCoreVersion)" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(NuGetBuild)' != 'true' and Exists($(LombiqHelpfulLibrariesPath))">
-    <ProjectReference Include="$(LombiqHelpfulLibrariesPath)\Lombiq.HelpfulLibraries.Refit\Lombiq.HelpfulLibraries.Refit.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(NuGetBuild)' != 'true' and !Exists($(LombiqHelpfulLibrariesPath))">
-    <ProjectReference Include="..\..\Lombiq.HelpfulLibraries\Lombiq.HelpfulLibraries.Refit\Lombiq.HelpfulLibraries.Refit.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(NuGetBuild)' == 'true'">
-    <PackageReference Include="Lombiq.HelpfulLibraries.Refit" Version="12.5.0" />
   </ItemGroup>
 
 </Project>
