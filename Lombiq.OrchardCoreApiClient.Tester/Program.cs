@@ -18,6 +18,10 @@ public static class Program
         "Design",
         "CA1303:Do not pass literals as localized parameters",
         Justification = "It is not a localization issue")]
+    [SuppressMessage(
+        "Major Code Smell",
+        "S106:Standard outputs should not be used directly to log anything",
+        Justification = "This is a command line utility, where it's fine.")]
     public static async Task Main(string[] arguments)
     {
         var port = int.TryParse(arguments.FirstOrDefault(), out var customPort) ? customPort : 44335;
