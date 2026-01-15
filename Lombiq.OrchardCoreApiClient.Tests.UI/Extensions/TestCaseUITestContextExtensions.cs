@@ -200,7 +200,7 @@ public static class TestCaseUITestContextExtensions
         await TestContentRemoveAsync(context, contentsApiClient, taxonomy);
     }
 
-    public static async Task GoToTenantLandingPageAsync(
+    public static Task GoToTenantLandingPageAsync(
         this UITestContext context,
         string requestUrlPrefix,
         string requestUrlHost = null)
@@ -213,12 +213,11 @@ public static class TestCaseUITestContextExtensions
                 Host = requestUrlHost,
                 Path = requestUrlPrefix,
             };
-            await context.GoToAbsoluteUrlAsync(uriBuilder.Uri, onlyIfNotAlreadyThere: false);
+
+            return context.GoToAbsoluteUrlAsync(uriBuilder.Uri, onlyIfNotAlreadyThere: false);
         }
-        else
-        {
-            await context.GoToRelativeUrlAsync(requestUrlPrefix, onlyIfNotAlreadyThere: false);
-        }
+
+        return context.GoToRelativeUrlAsync(requestUrlPrefix, onlyIfNotAlreadyThere: false);
     }
 
     private static async Task TestTenantCreateAsync(
