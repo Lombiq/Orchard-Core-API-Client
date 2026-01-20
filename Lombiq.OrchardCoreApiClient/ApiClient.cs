@@ -46,6 +46,21 @@ public class ApiClient<TApi> : IDisposable
                 sleepDurationProvider ?? (_ => TimeSpan.FromSeconds(2)),
                 onRetryAsync ?? ((_, _, _, _) => Task.CompletedTask));
 
+    public async Task ExecuteWithRetryPolicyAsync(Func<Task> executeAction, Func<ApiClientException, Task> catchAction)
+    {
+        try
+        {
+            await RetryPolicy.ExecuteAsync(executeAction);
+        }
+        catch (ApiClientException ex)
+        {
+            await catchAction(ex);
+
+            // Throw the exception again so the caller can handle it as well.
+            throw;
+        }
+    }
+
     public async Task<TResult> ExecuteWithRetryPolicyAsync<TResult>(
         Func<Task<TResult>> executeAction,
         Func<ApiClientException, Task> catchAction)
