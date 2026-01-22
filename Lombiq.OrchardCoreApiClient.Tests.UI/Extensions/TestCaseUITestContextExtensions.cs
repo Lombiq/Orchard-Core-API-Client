@@ -29,7 +29,7 @@ public static class TestCaseUITestContextExtensions
         string clientSecret = null,
         string featureProfile = null)
     {
-        await context.EnableTenantsFeatureAsync();
+        await context.EnableTenantsFeatureDirectlyAsync();
         await context.TestTenantsOrchardCoreApiClientBehaviorAsync(
             new ApiClientBehaviorTestModel
             {
