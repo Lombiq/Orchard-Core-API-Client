@@ -529,7 +529,7 @@ public static class TestCaseUITestContextExtensions
         var request = response.RequestMessage?.ToString() ?? "<Empty Request>";
         if (response.RequestMessage?.Content is JsonContent jsonContent)
         {
-            request += "\nJSON Content: " + jsonContent.Value;
+            request += "\nJSON Content: " + JsonSerializer.Serialize(jsonContent.Value);
         }
 
         response.Error.ShouldBeNull(
