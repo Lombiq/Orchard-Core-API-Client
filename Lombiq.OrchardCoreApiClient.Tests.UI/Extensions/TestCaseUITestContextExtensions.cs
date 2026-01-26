@@ -112,6 +112,8 @@ public static class TestCaseUITestContextExtensions
                 : DatabaseProviderValue.Sqlite;
             createApiModel.DatabaseProvider = databaseProvider;
             createApiModel.ConnectionString = context.SqlServerRunningContext?.ConnectionString;
+            setupApiModel.DatabaseProvider = databaseProvider;
+            setupApiModel.ConnectionString = context.SqlServerRunningContext?.ConnectionString;
             createApiModel.RequestUrlHost = string.Empty;
             editModel.RequestUrlHost = string.Empty;
         }
