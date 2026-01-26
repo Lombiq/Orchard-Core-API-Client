@@ -9,10 +9,14 @@ using Lombiq.Tests.UI.Services;
 using OpenQA.Selenium;
 using OrchardCore.Autoroute.Models;
 using OrchardCore.ContentManagement;
+using OrchardCore.Data;
 using OrchardCore.Taxonomies.Models;
+using Refit;
 using Shouldly;
 using System;
 using System.Linq;
+using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Xunit;
@@ -104,8 +108,8 @@ public static class TestCaseUITestContextExtensions
         {
             context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Using local test settings for creating tenant.");
             var databaseProvider = context.Configuration.UseSqlServer
-                ? "SqlConnection"
-                : "Sqlite";
+                ? DatabaseProviderValue.SqlConnection
+                : DatabaseProviderValue.Sqlite;
             createApiModel.DatabaseProvider = databaseProvider;
             createApiModel.ConnectionString = context.SqlServerRunningContext?.ConnectionString;
             createApiModel.RequestUrlHost = string.Empty;
@@ -231,9 +235,7 @@ public static class TestCaseUITestContextExtensions
         using (var response = await apiClient.OrchardCoreApi.CreateAsync(createApiModel))
         {
             await context.AssertLogsAsync();
-            response.Error.ShouldBeNull(
-                $"Tenant creation failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
-                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+            CheckResponse(response, "creation", context);
 
             context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Tenant creation response had no errors.");
 
@@ -276,9 +278,7 @@ public static class TestCaseUITestContextExtensions
         context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Initiating tenant setup...");
         using (var response = await apiClient.OrchardCoreApi.SetupAsync(setupApiModel))
         {
-            response.Error.ShouldBeNull(
-                $"Tenant setup failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
-                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+            CheckResponse(response, "setup", context);
         }
 
         context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Now going to the tenant landing page to assert the setup.");
@@ -303,9 +303,7 @@ public static class TestCaseUITestContextExtensions
         context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Editing the tenant...");
         using (var response = await apiClient.OrchardCoreApi.EditAsync(editModel))
         {
-            response.Error.ShouldBeNull(
-                $"Tenant edit failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
-                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+            CheckResponse(response, "edit", context);
         }
 
         if (checkOnAdmin)
@@ -329,9 +327,7 @@ public static class TestCaseUITestContextExtensions
 
         using (var response = await apiClient.OrchardCoreApi.EditAsync(editModel))
         {
-            response.Error.ShouldBeNull(
-                $"Tenant edit (with name change) failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
-                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+            CheckResponse(response, "edit (with name change)", context);
         }
 
         if (checkOnAdmin)
@@ -366,9 +362,7 @@ public static class TestCaseUITestContextExtensions
 
         using (var response = await apiClient.OrchardCoreApi.DisableAsync(editModel.Name))
         {
-            response.Error.ShouldBeNull(
-                $"Tenant disable failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
-                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+            CheckResponse(response, "disable", context);
         }
 
         if (checkOnAdmin)
@@ -396,7 +390,7 @@ public static class TestCaseUITestContextExtensions
 
                 // The tenant can remain running for a while even after having been disabled. Waiting a bit here to see
                 // if it gets unstuck.
-                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest &&
+                if (response.StatusCode == HttpStatusCode.BadRequest &&
                     response.Error?.Content?.Contains($"The tenant '{editModel.Name}' should be 'Disabled' or 'Uninitialized'.") == true)
                 {
                     context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug(
@@ -405,9 +399,7 @@ public static class TestCaseUITestContextExtensions
                     return false;
                 }
 
-                response.Error.ShouldBeNull(
-                    $"Tenant remove failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
-                    $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+                CheckResponse(response, "remove", context);
 
                 return true;
             },
@@ -530,5 +522,18 @@ public static class TestCaseUITestContextExtensions
             DefaultTenantUri = context.Scope.BaseUri,
             DisableCertificateValidation = true,
         };
+    }
+
+    private static void CheckResponse(ApiResponse<string> response, string taskName, UITestContext context)
+    {
+        var request = response.RequestMessage?.ToString() ?? "<Empty Request>";
+        if (response.RequestMessage?.Content is JsonContent jsonContent)
+        {
+            request += "\nJSON Content: " + jsonContent.Value;
+        }
+        
+        response.Error.ShouldBeNull(
+            $"Tenant {taskName} failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
+            $"Request: {request}\nDriver URL: {context.Driver.Url}");
     }
 }
