@@ -1,4 +1,5 @@
 using Atata;
+using Lombiq.HelpfulLibraries.Common.Utilities;
 using Lombiq.OrchardCoreApiClient.Clients;
 using Lombiq.OrchardCoreApiClient.Models;
 using Lombiq.OrchardCoreApiClient.Tests.UI.Models;
@@ -277,13 +278,22 @@ public static class TestCaseUITestContextExtensions
         TenantApiModel createApiModel,
         TenantSetupApiModel setupApiModel)
     {
-        context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Initiating tenant setup...");
-        using (var response = await apiClient.OrchardCoreApi.SetupAsync(setupApiModel))
+        var output = context.Configuration.TestOutputHelper;
+
+        var success = false;
+        const int maxSetupAttempts = 3;
+        for (var i = 0; !success && i < maxSetupAttempts; i++)
         {
-            CheckResponse(response, "setup", context);
+            output.WriteLineTimestampedAndDebug(StringHelper.CreateInvariant(
+                $"Initiating tenant setup (attempt {i + 1}/{maxSetupAttempts})...)"));
+
+            using var response = await apiClient.OrchardCoreApi.SetupAsync(setupApiModel);
+
+            if (response.Error == null) success = true;
+            if (i == maxSetupAttempts - 1) CheckResponse(response, "setup", context);
         }
 
-        context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Now going to the tenant landing page to assert the setup.");
+        output.WriteLineTimestampedAndDebug("Now going to the tenant landing page to assert the setup.");
 
         await context.GoToTenantLandingPageAsync(createApiModel.RequestUrlPrefix, createApiModel.RequestUrlHost);
 
@@ -292,7 +302,7 @@ public static class TestCaseUITestContextExtensions
 
         await GoToTenantUrlAndAssertHeaderAsync(context, createApiModel, setupApiModel);
 
-        context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Setting up the tenant succeeded.");
+        output.WriteLineTimestampedAndDebug("Setting up the tenant succeeded.");
     }
 
     private static async Task TestTenantEditAsync(
@@ -528,6 +538,8 @@ public static class TestCaseUITestContextExtensions
 
     private static void CheckResponse(ApiResponse<string> response, string taskName, UITestContext context)
     {
+        if (response.Error == null) return;
+
         var request = response.RequestMessage?.ToString() ?? "<Empty Request>";
         if (response.RequestMessage?.Content is JsonContent jsonContent)
         {
