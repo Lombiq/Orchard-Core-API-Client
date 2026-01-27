@@ -289,8 +289,14 @@ public static class TestCaseUITestContextExtensions
 
             using var response = await apiClient.OrchardCoreApi.SetupAsync(setupApiModel);
 
-            if (response.Error == null) success = true;
+            if (response.Error == null)
+            {
+                success = true;
+                continue;
+            }
+
             if (i == maxSetupAttempts - 1) CheckResponse(response, "setup", context);
+            await Task.Delay(TimeSpan.FromSeconds(3), Xunit.TestContext.Current.CancellationToken);
         }
 
         output.WriteLineTimestampedAndDebug("Now going to the tenant landing page to assert the setup.");
