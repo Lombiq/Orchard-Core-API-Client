@@ -128,7 +128,7 @@ public static class TestCaseUITestContextExtensions
             await context.GoToAdminRelativeUrlAsync("/OpenId/Application");
             await context.ClickReliablyOnAsync(
                 By.XPath($"//li[contains(@class, 'list-group-item') and contains(., '{apiClientSettings.ClientId}')]" +
-                         $"//a[normalize-space(.) = 'Edit']"));
+                         "//a[normalize-space(.) = 'Edit']"));
             context.Get(By.Name("ClientId")).GetAttribute("value").ShouldBe(apiClientSettings.ClientId);
         }
         else if (isLocalTest)
