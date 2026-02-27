@@ -242,7 +242,32 @@ public static class TestCaseUITestContextExtensions
             context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Tenant creation response had no errors.");
 
             // Check if response URL is valid, and visit it (should be the tenant setup page and not 404 error).
-            var responseUrl = new Uri(response.Content);
+            if (!Uri.TryCreate(response.Content, UriKind.Absolute, out var responseUrl))
+            {
+                context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug(
+                    $"Couldn't parse response URL ({response.Content}).\n" + JsonSerializer.Serialize(new
+                    {
+                        response.Content,
+                        response.ContentHeaders,
+                        response.Error,
+                        response.Headers,
+                        response.IsSuccessful,
+                        response.IsSuccessStatusCode,
+                        response.ReasonPhrase,
+                        response.StatusCode,
+                        response.Version,
+                        RequestMessage = new
+                        {
+                            response.RequestMessage?.Content,
+                            response.RequestMessage?.Headers,
+                            response.RequestMessage?.Version,
+                            response.RequestMessage?.Method,
+                            response.RequestMessage?.RequestUri,
+                            response.RequestMessage?.VersionPolicy,
+                        },
+                    }));
+            }
+
             context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Trying to go to the tenant setup page: " + responseUrl);
             await context.GoToAbsoluteUrlAsync(responseUrl);
         }
