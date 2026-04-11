@@ -456,10 +456,10 @@ public static class TestCaseUITestContextExtensions
         context.Get(By.Id("TitlePart_Title")).GetValue().ShouldBe(contentItem.DisplayText);
 
         context.Get(By.Id("AutoroutePart_RouteContainedItems")).GetValue()
-            .ShouldBe(contentItem.As<AutoroutePart>().RouteContainedItems.ToString().ToLowerFirstLetter());
+            .ShouldBe(contentItem.GetOrCreate<AutoroutePart>().RouteContainedItems.ToString().ToLowerFirstLetter());
 
         context.Get(By.CssSelector("#TaxonomyPart_TermContentType option[selected]")).Text
-            .ShouldBe(contentItem.As<TaxonomyPart>().TermContentType);
+            .ShouldBe(contentItem.GetOrCreate<TaxonomyPart>().TermContentType);
 
         return contentItemIdFromApi;
     }
@@ -480,8 +480,8 @@ public static class TestCaseUITestContextExtensions
 
         contentItemFromApi.DisplayText.ShouldBe(contentItem.DisplayText);
         contentItemFromApi.ContentType.ShouldBe(contentItem.ContentType);
-        contentItemFromApiAutoroutePart.RouteContainedItems.ShouldBe(contentItem.As<AutoroutePart>().RouteContainedItems);
-        contentItemFromApiTaxonomyPart.TermContentType.ShouldBe(contentItem.As<TaxonomyPart>().TermContentType);
+        contentItemFromApiAutoroutePart.RouteContainedItems.ShouldBe(contentItem.GetOrCreate<AutoroutePart>().RouteContainedItems);
+        contentItemFromApiTaxonomyPart.TermContentType.ShouldBe(contentItem.GetOrCreate<TaxonomyPart>().TermContentType);
     }
 
     private static async Task TestContentRemoveAsync(
