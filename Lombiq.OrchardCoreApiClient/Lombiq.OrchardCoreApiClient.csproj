@@ -1,31 +1,24 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+<Project>
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <DefaultItemExcludes>$(DefaultItemExcludes);.git*</DefaultItemExcludes>
   </PropertyGroup>
+
+  <Import Condition="'$(NuGetBuild)' != 'true'" Project="../../../Utilities/Lombiq.MSBuild.Targets/Lombiq.MSBuild.Library.Sdk/Sdk/Import.props" />
+  <Import Condition="'$(NuGetBuild)' == 'true'" Project="Sdk.props" Sdk="Lombiq.MSBuild.Library.Sdk" Version="1.0.1-alpha.12.osoe-1208" />
 
   <PropertyGroup>
     <Title>Lombiq API Client for Orchard Core</Title>
-    <Authors>Lombiq Technologies</Authors>
-    <Copyright>Copyright © 2022, Lombiq Technologies Ltd.</Copyright>
-    <Description>Lombiq API Client for Orchard Core: A client library for communicating with the Orchard Core web APIs.</Description>
-    <PackageIcon>NuGetIcon.png</PackageIcon>
+    <CopyrightYear>2022</CopyrightYear>
+    <DescriptionBody>A client library for communicating with the Orchard Core web APIs.</DescriptionBody>
     <PackageTags>OrchardCore;Lombiq;Refit;OpenId;ApiClient</PackageTags>
     <RepositoryUrl>https://github.com/Lombiq/Orchard-Core-API-Client</RepositoryUrl>
     <PackageProjectUrl>https://github.com/Lombiq/Orchard-Core-API-Client</PackageProjectUrl>
-    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="Readme.md" />
-    <None Include="NuGetIcon.png" Pack="true" PackagePath="" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="NodaTime" Version="3.3.1" />
     <PackageReference Include="Polly" Version="8.6.6" />
-    <PackageReference Include="OrchardCore.ContentManagement.Abstractions" Version="3.0.0-preview-18960" />
+    <PackageReference Include="OrchardCore.ContentManagement.Abstractions" Version="3.0.0-preview-18975" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(NuGetBuild)' != 'true' and Exists($(LombiqHelpfulLibrariesPath))">
@@ -37,7 +30,9 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(NuGetBuild)' == 'true'">
-    <PackageReference Include="Lombiq.HelpfulLibraries.Refit" Version="12.6.1-alpha.5.osoe-925" />
+    <PackageReference Include="Lombiq.HelpfulLibraries.Refit" Version="12.6.1-alpha.7.osoe-925" />
   </ItemGroup>
 
+  <Import Condition="'$(NuGetBuild)' != 'true'" Project="../../../Utilities/Lombiq.MSBuild.Targets/Lombiq.MSBuild.Library.Sdk/Sdk/Import.targets" />
+  <Import Condition="'$(NuGetBuild)' == 'true'" Project="Sdk.targets" Sdk="Lombiq.MSBuild.Library.Sdk" Version="1.0.1-alpha.12.osoe-1208" />
 </Project>
