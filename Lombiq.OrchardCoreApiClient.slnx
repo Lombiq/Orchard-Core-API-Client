@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Lombiq.OrchardCoreApiClient.Tests.UI/Lombiq.OrchardCoreApiClient.Tests.UI.csproj" />
+  <Project Path="Lombiq.OrchardCoreApiClient/Lombiq.OrchardCoreApiClient.csproj" />
+</Solution>
