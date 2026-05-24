@@ -18,7 +18,7 @@
   <ItemGroup>
     <PackageReference Include="NodaTime" Version="3.3.2" />
     <PackageReference Include="Polly" Version="8.6.6" />
-    <PackageReference Include="OrchardCore.ContentManagement.Abstractions" Version="3.0.0-preview-19009" />
+    <PackageReference Include="OrchardCore.ContentManagement.Abstractions" Version="3.0.0-preview-19023" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(NuGetBuild)' != 'true' and Exists($(LombiqHelpfulLibrariesPath))">
