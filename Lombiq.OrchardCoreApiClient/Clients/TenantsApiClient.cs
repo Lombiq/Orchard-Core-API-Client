@@ -30,7 +30,7 @@ public class TenantsApiClient : ApiClient<IOrchardCoreTenantsApi>
             using var response = await OrchardCoreApi.CreateAsync(createApiViewModel).ConfigureAwait(false);
             await response.EnsureSuccessStatusCodeAsync();
         }
-        catch (ApiException ex)
+        catch (ApiExceptionBase ex)
         {
             throw new ApiClientException("Tenant creation failed.", ex);
         }
@@ -40,7 +40,7 @@ public class TenantsApiClient : ApiClient<IOrchardCoreTenantsApi>
             using var response = await OrchardCoreApi.SetupAsync(setupApiViewModel).ConfigureAwait(false);
             await response.EnsureSuccessStatusCodeAsync();
         }
-        catch (ApiException ex)
+        catch (ApiExceptionBase ex)
         {
             throw new ApiClientException("Tenant setup failed.", ex);
         }
