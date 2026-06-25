@@ -10,6 +10,7 @@ using OpenQA.Selenium;
 using OrchardCore.Autoroute.Models;
 using OrchardCore.ContentManagement;
 using OrchardCore.Taxonomies.Models;
+using Refit;
 using Shouldly;
 using System;
 using System.Linq;
@@ -231,7 +232,7 @@ public static class TestCaseUITestContextExtensions
         {
             await context.AssertLogsAsync();
             response.Error.ShouldBeNull(
-                $"Tenant creation failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
+                $"Tenant creation failed with status code {response.StatusCode}. Content: {GetApiErrorContent(response)}\n" +
                 $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
 
             context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Tenant creation response had no errors.");
@@ -276,7 +277,7 @@ public static class TestCaseUITestContextExtensions
         using (var response = await apiClient.OrchardCoreApi.SetupAsync(setupApiModel))
         {
             response.Error.ShouldBeNull(
-                $"Tenant setup failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
+                $"Tenant setup failed with status code {response.StatusCode}. Content: {GetApiErrorContent(response)}\n" +
                 $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
         }
 
@@ -303,7 +304,7 @@ public static class TestCaseUITestContextExtensions
         using (var response = await apiClient.OrchardCoreApi.EditAsync(editModel))
         {
             response.Error.ShouldBeNull(
-                $"Tenant edit failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
+                $"Tenant edit failed with status code {response.StatusCode}. Content: {GetApiErrorContent(response)}\n" +
                 $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
         }
 
@@ -329,7 +330,7 @@ public static class TestCaseUITestContextExtensions
         using (var response = await apiClient.OrchardCoreApi.EditAsync(editModel))
         {
             response.Error.ShouldBeNull(
-                $"Tenant edit (with name change) failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
+                $"Tenant edit (with name change) failed with status code {response.StatusCode}. Content: {GetApiErrorContent(response)}\n" +
                 $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
         }
 
@@ -366,7 +367,7 @@ public static class TestCaseUITestContextExtensions
         using (var response = await apiClient.OrchardCoreApi.DisableAsync(editModel.Name))
         {
             response.Error.ShouldBeNull(
-                $"Tenant disable failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
+                $"Tenant disable failed with status code {response.StatusCode}. Content: {GetApiErrorContent(response)}\n" +
                 $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
         }
 
@@ -395,8 +396,9 @@ public static class TestCaseUITestContextExtensions
 
                 // The tenant can remain running for a while even after having been disabled. Waiting a bit here to see
                 // if it gets unstuck.
+                var errorContent = GetApiErrorContent(response);
                 if (response.StatusCode == System.Net.HttpStatusCode.BadRequest &&
-                    response.Error?.Content?.Contains($"The tenant '{editModel.Name}' should be 'Disabled' or 'Uninitialized'.") == true)
+                    errorContent?.Contains($"The tenant '{editModel.Name}' should be 'Disabled' or 'Uninitialized'.") == true)
                 {
                     context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug(
                         "The tenant is still running, despite being disabled, and thus can't be removed. Attempting again.");
@@ -405,7 +407,7 @@ public static class TestCaseUITestContextExtensions
                 }
 
                 response.Error.ShouldBeNull(
-                    $"Tenant remove failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
+                    $"Tenant remove failed with status code {response.StatusCode}. Content: {errorContent}\n" +
                     $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
 
                 return true;
@@ -530,4 +532,7 @@ public static class TestCaseUITestContextExtensions
             DisableCertificateValidation = true,
         };
     }
+
+    private static string GetApiErrorContent(ApiResponse<string> response) =>
+        response.Error is ApiException apiException ? apiException.Content : null;
 }
