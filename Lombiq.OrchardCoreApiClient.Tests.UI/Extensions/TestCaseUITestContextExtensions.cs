@@ -10,12 +10,12 @@ using OpenQA.Selenium;
 using OrchardCore.Autoroute.Models;
 using OrchardCore.ContentManagement;
 using OrchardCore.Taxonomies.Models;
+using Refit;
 using Shouldly;
 using System;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Refit;
 using Xunit;
 
 namespace Lombiq.OrchardCoreApiClient.Tests.UI.Extensions;
