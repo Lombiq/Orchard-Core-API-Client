@@ -565,4 +565,7 @@ public static class TestCaseUITestContextExtensions
             $"Tenant {taskName} failed with status code {response.StatusCode}. Content: {content}\n" +
             $"Request: {request}\nDriver URL: {context.Driver.Url}");
     }
+
+    private static string GetApiErrorContent(ApiResponse<string> response) =>
+        response.Error is ApiException apiException ? apiException.Content : null;
 }
