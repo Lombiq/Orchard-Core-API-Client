@@ -258,12 +258,12 @@ public static class TestCaseUITestContextExtensions
                         response.Version,
                         RequestMessage = new
                         {
-                            response.RequestMessage?.Content,
-                            response.RequestMessage?.Headers,
-                            response.RequestMessage?.Version,
-                            response.RequestMessage?.Method,
-                            response.RequestMessage?.RequestUri,
-                            response.RequestMessage?.VersionPolicy,
+                            response.RequestMessage.Content,
+                            response.RequestMessage.Headers,
+                            response.RequestMessage.Version,
+                            response.RequestMessage.Method,
+                            response.RequestMessage.RequestUri,
+                            response.RequestMessage.VersionPolicy,
                         },
                     }));
             }
@@ -418,7 +418,8 @@ public static class TestCaseUITestContextExtensions
                 // The tenant can remain running for a while even after having been disabled. Waiting a bit here to see
                 // if it gets unstuck.
                 if (response.StatusCode == HttpStatusCode.BadRequest &&
-                    response.Error?.Content?.Contains($"The tenant '{editModel.Name}' should be 'Disabled' or 'Uninitialized'.") == true)
+                    response.Error is ApiException apiException &&
+                    apiException.Content?.Contains($"The tenant '{editModel.Name}' should be 'Disabled' or 'Uninitialized'.") == true)
                 {
                     context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug(
                         "The tenant is still running, despite being disabled, and thus can't be removed. Attempting again.");
@@ -553,14 +554,15 @@ public static class TestCaseUITestContextExtensions
 
     private static void CheckResponse(ApiResponse<string> response, string taskName, UITestContext context)
     {
-        var request = response.RequestMessage?.ToString() ?? "<Empty Request>";
-        if (response.RequestMessage?.Content is JsonContent jsonContent)
+        var request = response.RequestMessage.ToString();
+        if (response.RequestMessage.Content is JsonContent jsonContent)
         {
             request += "\nJSON Content: " + JsonSerializer.Serialize(jsonContent.Value);
         }
 
+        var content = (response.Error as ApiException)?.Content;
         response.Error.ShouldBeNull(
-            $"Tenant {taskName} failed with status code {response.StatusCode}. Content: {response.Error?.Content}\n" +
+            $"Tenant {taskName} failed with status code {response.StatusCode}. Content: {content}\n" +
             $"Request: {request}\nDriver URL: {context.Driver.Url}");
     }
 }
