@@ -10,6 +10,7 @@ using OpenQA.Selenium;
 using OrchardCore.Autoroute.Models;
 using OrchardCore.ContentManagement;
 using OrchardCore.Taxonomies.Models;
+using Refit;
 using Shouldly;
 using System;
 using System.Linq;
