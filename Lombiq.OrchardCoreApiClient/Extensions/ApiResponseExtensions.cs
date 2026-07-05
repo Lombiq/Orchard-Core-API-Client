@@ -1,6 +1,4 @@
-using Refit;
-
-namespace Lombiq.OrchardCoreApiClient.Extensions;
+namespace Refit;
 
 public static class ApiResponseExtensions
 {

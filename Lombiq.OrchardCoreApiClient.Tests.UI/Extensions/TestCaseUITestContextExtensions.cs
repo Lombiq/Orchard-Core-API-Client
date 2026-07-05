@@ -1,6 +1,5 @@
 using Atata;
 using Lombiq.OrchardCoreApiClient.Clients;
-using Lombiq.OrchardCoreApiClient.Extensions;
 using Lombiq.OrchardCoreApiClient.Models;
 using Lombiq.OrchardCoreApiClient.Tests.UI.Models;
 using Lombiq.Tests.UI.Constants;
