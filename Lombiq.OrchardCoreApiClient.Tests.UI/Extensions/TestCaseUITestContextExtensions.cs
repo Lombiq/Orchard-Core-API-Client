@@ -9,11 +9,14 @@ using Lombiq.Tests.UI.Services;
 using OpenQA.Selenium;
 using OrchardCore.Autoroute.Models;
 using OrchardCore.ContentManagement;
+using OrchardCore.Data;
 using OrchardCore.Taxonomies.Models;
 using Refit;
 using Shouldly;
 using System;
 using System.Linq;
+using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Xunit;
@@ -30,6 +33,7 @@ public static class TestCaseUITestContextExtensions
         string clientSecret = null,
         string featureProfile = null)
     {
+        await context.EnableTenantsFeatureDirectlyAsync();
         await context.TestTenantsOrchardCoreApiClientBehaviorAsync(
             new ApiClientBehaviorTestModel
             {
@@ -104,10 +108,12 @@ public static class TestCaseUITestContextExtensions
         {
             context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Using local test settings for creating tenant.");
             var databaseProvider = context.Configuration.UseSqlServer
-                ? "SqlConnection"
-                : "Sqlite";
+                ? DatabaseProviderValue.SqlConnection
+                : DatabaseProviderValue.Sqlite;
             createApiModel.DatabaseProvider = databaseProvider;
             createApiModel.ConnectionString = context.SqlServerRunningContext?.ConnectionString;
+            setupApiModel.DatabaseProvider = databaseProvider;
+            setupApiModel.ConnectionString = context.SqlServerRunningContext?.ConnectionString;
             createApiModel.RequestUrlHost = string.Empty;
             editModel.RequestUrlHost = string.Empty;
         }
@@ -231,14 +237,37 @@ public static class TestCaseUITestContextExtensions
         using (var response = await apiClient.OrchardCoreApi.CreateAsync(createApiModel))
         {
             await context.AssertLogsAsync();
-            response.Error.ShouldBeNull(
-                $"Tenant creation failed with status code {response.StatusCode}. Content: {response.GetApiErrorContent()}\n" +
-                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+            CheckResponse(response, "creation", context);
 
             context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Tenant creation response had no errors.");
 
             // Check if response URL is valid, and visit it (should be the tenant setup page and not 404 error).
-            var responseUrl = new Uri(response.Content);
+            if (!Uri.TryCreate(response.Content, UriKind.Absolute, out var responseUrl))
+            {
+                context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug(
+                    $"Couldn't parse response URL ({response.Content}).\n" + JsonSerializer.Serialize(new
+                    {
+                        response.Content,
+                        response.ContentHeaders,
+                        response.Error,
+                        response.Headers,
+                        response.IsSuccessful,
+                        response.IsSuccessStatusCode,
+                        response.ReasonPhrase,
+                        response.StatusCode,
+                        response.Version,
+                        RequestMessage = new
+                        {
+                            response.RequestMessage.Content,
+                            response.RequestMessage.Headers,
+                            response.RequestMessage.Version,
+                            response.RequestMessage.Method,
+                            response.RequestMessage.RequestUri,
+                            response.RequestMessage.VersionPolicy,
+                        },
+                    }));
+            }
+
             context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Trying to go to the tenant setup page: " + responseUrl);
             await context.GoToAbsoluteUrlAsync(responseUrl);
         }
@@ -276,9 +305,7 @@ public static class TestCaseUITestContextExtensions
         context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Initiating tenant setup...");
         using (var response = await apiClient.OrchardCoreApi.SetupAsync(setupApiModel))
         {
-            response.Error.ShouldBeNull(
-                $"Tenant setup failed with status code {response.StatusCode}. Content: {response.GetApiErrorContent()}\n" +
-                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+            CheckResponse(response, "setup", context);
         }
 
         context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Now going to the tenant landing page to assert the setup.");
@@ -303,9 +330,7 @@ public static class TestCaseUITestContextExtensions
         context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Editing the tenant...");
         using (var response = await apiClient.OrchardCoreApi.EditAsync(editModel))
         {
-            response.Error.ShouldBeNull(
-                $"Tenant edit failed with status code {response.StatusCode}. Content: {response.GetApiErrorContent()}\n" +
-                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+            CheckResponse(response, "edit", context);
         }
 
         if (checkOnAdmin)
@@ -329,9 +354,7 @@ public static class TestCaseUITestContextExtensions
 
         using (var response = await apiClient.OrchardCoreApi.EditAsync(editModel))
         {
-            response.Error.ShouldBeNull(
-                $"Tenant edit (with name change) failed with status code {response.StatusCode}. Content: {response.GetApiErrorContent()}\n" +
-                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+            CheckResponse(response, "edit (with name change)", context);
         }
 
         if (checkOnAdmin)
@@ -366,9 +389,7 @@ public static class TestCaseUITestContextExtensions
 
         using (var response = await apiClient.OrchardCoreApi.DisableAsync(editModel.Name))
         {
-            response.Error.ShouldBeNull(
-                $"Tenant disable failed with status code {response.StatusCode}. Content: {response.GetApiErrorContent()}\n" +
-                $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+            CheckResponse(response, "disable", context);
         }
 
         if (checkOnAdmin)
@@ -396,9 +417,9 @@ public static class TestCaseUITestContextExtensions
 
                 // The tenant can remain running for a while even after having been disabled. Waiting a bit here to see
                 // if it gets unstuck.
-                var errorContent = response.GetApiErrorContent();
-                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest &&
-                    errorContent?.Contains($"The tenant '{editModel.Name}' should be 'Disabled' or 'Uninitialized'.") == true)
+                if (response.StatusCode == HttpStatusCode.BadRequest &&
+                    response.Error is ApiException apiException &&
+                    apiException.Content?.Contains($"The tenant '{editModel.Name}' should be 'Disabled' or 'Uninitialized'.") == true)
                 {
                     context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug(
                         "The tenant is still running, despite being disabled, and thus can't be removed. Attempting again.");
@@ -406,9 +427,7 @@ public static class TestCaseUITestContextExtensions
                     return false;
                 }
 
-                response.Error.ShouldBeNull(
-                    $"Tenant remove failed with status code {response.StatusCode}. Content: {errorContent}\n" +
-                    $"Request: {response.RequestMessage}\nDriver URL: {context.Driver.Url}");
+                CheckResponse(response, "remove", context);
 
                 return true;
             },
@@ -438,10 +457,10 @@ public static class TestCaseUITestContextExtensions
         context.Get(By.Id("TitlePart_Title")).GetValue().ShouldBe(contentItem.DisplayText);
 
         context.Get(By.Id("AutoroutePart_RouteContainedItems")).GetValue()
-            .ShouldBe(contentItem.As<AutoroutePart>().RouteContainedItems.ToString().ToLowerFirstLetter());
+            .ShouldBe(contentItem.GetOrCreate<AutoroutePart>().RouteContainedItems.ToString().ToLowerFirstLetter());
 
         context.Get(By.CssSelector("#TaxonomyPart_TermContentType option[selected]")).Text
-            .ShouldBe(contentItem.As<TaxonomyPart>().TermContentType);
+            .ShouldBe(contentItem.GetOrCreate<TaxonomyPart>().TermContentType);
 
         return contentItemIdFromApi;
     }
@@ -462,8 +481,8 @@ public static class TestCaseUITestContextExtensions
 
         contentItemFromApi.DisplayText.ShouldBe(contentItem.DisplayText);
         contentItemFromApi.ContentType.ShouldBe(contentItem.ContentType);
-        contentItemFromApiAutoroutePart.RouteContainedItems.ShouldBe(contentItem.As<AutoroutePart>().RouteContainedItems);
-        contentItemFromApiTaxonomyPart.TermContentType.ShouldBe(contentItem.As<TaxonomyPart>().TermContentType);
+        contentItemFromApiAutoroutePart.RouteContainedItems.ShouldBe(contentItem.GetOrCreate<AutoroutePart>().RouteContainedItems);
+        contentItemFromApiTaxonomyPart.TermContentType.ShouldBe(contentItem.GetOrCreate<TaxonomyPart>().TermContentType);
     }
 
     private static async Task TestContentRemoveAsync(
@@ -531,5 +550,19 @@ public static class TestCaseUITestContextExtensions
             DefaultTenantUri = context.Scope.BaseUri,
             DisableCertificateValidation = true,
         };
+    }
+
+    private static void CheckResponse(ApiResponse<string> response, string taskName, UITestContext context)
+    {
+        var request = response.RequestMessage.ToString();
+        if (response.RequestMessage.Content is JsonContent jsonContent)
+        {
+            request += "\nJSON Content: " + JsonSerializer.Serialize(jsonContent.Value);
+        }
+
+        var content = (response.Error as ApiException)?.Content;
+        response.Error.ShouldBeNull(
+            $"Tenant {taskName} failed with status code {response.StatusCode}. Content: {content}\n" +
+            $"Request: {request}\nDriver URL: {context.Driver.Url}");
     }
 }
