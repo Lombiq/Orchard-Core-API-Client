@@ -57,6 +57,20 @@ internal sealed class ConfigurableCertificateValidatingHttpClientHandler : HttpC
                             ["client_secret"] = _apiClientSettings.ClientSecret,
                         });
             }
+            catch (ApiException exception)
+            {
+                var content = exception.Content ?? "<no response content>";
+                throw new ApiClientException(
+                    $"API client setup failed. An error occurred while retrieving an access token: {exception.Message}\nContent: {content}",
+                    exception);
+            }
+            catch (ApiRequestException requestException) when (requestException.InnerException is ApiException exception)
+            {
+                var content = exception.Content ?? "<no response content>";
+                throw new ApiClientException(
+                    $"API client setup failed. An error occurred while retrieving an access token: {exception.Message}\nContent: {content}",
+                    exception);
+            }
             catch (Exception exception)
             {
                 throw new ApiClientException(
