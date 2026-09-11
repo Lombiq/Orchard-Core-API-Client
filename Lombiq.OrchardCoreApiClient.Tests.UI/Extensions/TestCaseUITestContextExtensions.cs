@@ -126,21 +126,24 @@ public static class TestCaseUITestContextExtensions
         const string defaultClientRecipe = "Lombiq.OrchardCoreApiClient.Tests.UI.OpenId";
         context.Scope.AtataContext.Log.Info($"Executing the default client recipe \"{defaultClientRecipe}\": {isDefaultClient}");
 
-        if (isDefaultClient)
+        if (isLocalTest)
         {
-            await context.ExecuteRecipeDirectlyAsync(defaultClientRecipe);
+            if (isDefaultClient)
+            {
+                await context.ExecuteRecipeDirectlyAsync(defaultClientRecipe);
 
-            // Verify that the recipe has successfully created the application.
-            await context.SignInDirectlyAsync();
-            await context.GoToAdminRelativeUrlAsync("/OpenId/Application");
-            await context.ClickReliablyOnAsync(
-                By.XPath($"//li[contains(@class, 'list-group-item') and contains(., '{apiClientSettings.ClientId}')]" +
-                         "//a[normalize-space(.) = 'Edit']"));
-            context.Get(By.Name("ClientId")).GetAttribute("value").ShouldBe(apiClientSettings.ClientId);
-        }
-        else if (isLocalTest)
-        {
-            await context.SignInDirectlyAsync();
+                // Verify that the recipe has successfully created the application.
+                await context.SignInDirectlyAsync();
+                await context.GoToAdminRelativeUrlAsync("/OpenId/Application");
+                await context.ClickReliablyOnAsync(
+                    By.XPath($"//li[contains(@class, 'list-group-item') and contains(., '{apiClientSettings.ClientId}')]" +
+                        "//a[normalize-space(.) = 'Edit']"));
+                context.Get(By.Name("ClientId")).GetAttribute("value").ShouldBe(apiClientSettings.ClientId);
+            }
+            else
+            {
+                await context.SignInDirectlyAsync();
+            }
         }
 
         // Ensure that the tenant does not exist before starting the tests.
