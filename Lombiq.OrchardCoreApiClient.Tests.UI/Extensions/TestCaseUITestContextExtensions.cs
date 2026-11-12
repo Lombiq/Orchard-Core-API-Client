@@ -146,9 +146,16 @@ public static class TestCaseUITestContextExtensions
             }
         }
 
-        // Ensure that the tenant does not exist before starting the tests.
-        await tenantsApiClient.OrchardCoreApi.DisableAsync(editModel.Name);
-        await tenantsApiClient.OrchardCoreApi.RemoveAsync(editModel.Name);
+        // Ensure that the tenant does not exist before starting the tests (e.g. left over from a failed attempt).
+        using (var response = await tenantsApiClient.OrchardCoreApi.DisableAsync(editModel.Name))
+        {
+            if (response.StatusCode != HttpStatusCode.NotFound)
+            {
+                context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug(
+                    "The tenant already exists, removing it before starting the tests.");
+                await RemoveTenantWithRetriesAsync(context, tenantsApiClient, editModel.Name);
+            }
+        }
 
         await TestTenantCreateAsync(context, tenantsApiClient, createApiModel, isLocalTest);
         await TestTenantSetupAsync(context, tenantsApiClient, createApiModel, setupApiModel);
@@ -244,8 +251,15 @@ public static class TestCaseUITestContextExtensions
 
             context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Tenant creation response had no errors.");
 
-            // Check if response URL is valid, and visit it (should be the tenant setup page and not 404 error).
-            if (!Uri.TryCreate(response.Content, UriKind.Absolute, out var responseUrl))
+            // Check if response URL is valid, and visit it (should be the tenant setup page and not 404 error). For an
+            // already existing tenant, the URL is only in the Location header of the 201 response.
+            if (!Uri.TryCreate(response.Content, UriKind.Absolute, out var responseUrl) &&
+                response.Headers.Location is { IsAbsoluteUri: true } location)
+            {
+                responseUrl = location;
+            }
+
+            if (responseUrl == null)
             {
                 context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug(
                     $"Couldn't parse response URL ({response.Content}).\n" + JsonSerializer.Serialize(new
@@ -413,16 +427,29 @@ public static class TestCaseUITestContextExtensions
     {
         context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Removing the tenant...");
 
-        await ReliabilityHelper.DoWithRetriesOrFailAsync(
+        await RemoveTenantWithRetriesAsync(context, apiClient, editModel.Name);
+
+        if (checkOnAdmin)
+        {
+            await context.GoToAdminRelativeUrlAsync("/Tenants", onlyIfNotAlreadyThere: false);
+            await context.FilterOnAdminWithSearchBoxAsync(editModel.Name);
+            context.Missing(By.LinkText(editModel.Name));
+        }
+
+        context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Removing the tenant succeeded.");
+    }
+
+    private static Task RemoveTenantWithRetriesAsync(UITestContext context, TenantsApiClient apiClient, string tenantName) =>
+        ReliabilityHelper.DoWithRetriesOrFailAsync(
             async () =>
             {
-                using var response = await apiClient.OrchardCoreApi.RemoveAsync(editModel.Name);
+                using var response = await apiClient.OrchardCoreApi.RemoveAsync(tenantName);
 
                 // The tenant can remain running for a while even after having been disabled. Waiting a bit here to see
                 // if it gets unstuck.
                 if (response.StatusCode == HttpStatusCode.BadRequest &&
                     response.Error is ApiException apiException &&
-                    apiException.Content?.Contains($"The tenant '{editModel.Name}' should be 'Disabled' or 'Uninitialized'.") == true)
+                    apiException.Content?.Contains($"The tenant '{tenantName}' should be 'Disabled' or 'Uninitialized'.") == true)
                 {
                     context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug(
                         "The tenant is still running, despite being disabled, and thus can't be removed. Attempting again.");
@@ -437,16 +464,6 @@ public static class TestCaseUITestContextExtensions
             TimeSpan.FromSeconds(30),
             TimeSpan.FromSeconds(5),
             context.Configuration.TestCancellationToken);
-
-        if (checkOnAdmin)
-        {
-            await context.GoToAdminRelativeUrlAsync("/Tenants", onlyIfNotAlreadyThere: false);
-            await context.FilterOnAdminWithSearchBoxAsync(editModel.Name);
-            context.Missing(By.LinkText(editModel.Name));
-        }
-
-        context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Removing the tenant succeeded.");
-    }
 
     private static async Task<string> TestContentCreateAsync(
         UITestContext context,
