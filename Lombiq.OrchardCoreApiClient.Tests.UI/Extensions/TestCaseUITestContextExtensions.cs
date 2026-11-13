@@ -157,41 +157,49 @@ public static class TestCaseUITestContextExtensions
             }
         }
 
-        await TestTenantCreateAsync(context, tenantsApiClient, createApiModel, isLocalTest);
-        await TestTenantSetupAsync(context, tenantsApiClient, createApiModel, setupApiModel);
-
-        // If there are additional steps to execute in the tenant context, do that now.
-        if (apiClientBehaviorTestModel.StepsInTenantContext != null)
+        try
         {
-            context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Executing additional steps in the tenant context...");
+            await TestTenantCreateAsync(context, tenantsApiClient, createApiModel, isLocalTest);
+            await TestTenantSetupAsync(context, tenantsApiClient, createApiModel, setupApiModel);
 
-            // Switch to the tenant context.
-            if (string.IsNullOrEmpty(createApiModel.RequestUrlHost))
+            // If there are additional steps to execute in the tenant context, do that now.
+            if (apiClientBehaviorTestModel.StepsInTenantContext != null)
             {
-                context.SwitchCurrentTenant(createApiModel.Name, createApiModel.RequestUrlPrefix);
-            }
-            else
-            {
-                var uriBuilder = new UriBuilder
+                context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Executing additional steps in the tenant context...");
+
+                // Switch to the tenant context.
+                if (string.IsNullOrEmpty(createApiModel.RequestUrlHost))
                 {
-                    Scheme = "https",
-                    Host = createApiModel.RequestUrlHost,
-                    Path = createApiModel.RequestUrlPrefix,
-                };
-                context.SwitchCurrentTenant(createApiModel.Name, uriBuilder.Uri);
+                    context.SwitchCurrentTenant(createApiModel.Name, createApiModel.RequestUrlPrefix);
+                }
+                else
+                {
+                    var uriBuilder = new UriBuilder
+                    {
+                        Scheme = "https",
+                        Host = createApiModel.RequestUrlHost,
+                        Path = createApiModel.RequestUrlPrefix,
+                    };
+                    context.SwitchCurrentTenant(createApiModel.Name, uriBuilder.Uri);
+                }
+
+                // Execute additional steps in the tenant context.
+                await apiClientBehaviorTestModel.StepsInTenantContext(context, createApiModel, setupApiModel);
+
+                // Switch back to the Default tenant.
+                context.SwitchCurrentTenantToDefault();
+                context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Additional steps in the tenant context were done.");
             }
 
-            // Execute additional steps in the tenant context.
-            await apiClientBehaviorTestModel.StepsInTenantContext(context, createApiModel, setupApiModel);
-
-            // Switch back to the Default tenant.
-            context.SwitchCurrentTenantToDefault();
-            context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Additional steps in the tenant context were done.");
+            await TestTenantEditAsync(context, tenantsApiClient, editModel, setupApiModel, isLocalTest);
+            await TestTenantDisableAsync(context, tenantsApiClient, editModel, isLocalTest);
+            await TestTenantRemoveAsync(context, tenantsApiClient, editModel, isLocalTest);
         }
-
-        await TestTenantEditAsync(context, tenantsApiClient, editModel, setupApiModel, isLocalTest);
-        await TestTenantDisableAsync(context, tenantsApiClient, editModel, isLocalTest);
-        await TestTenantRemoveAsync(context, tenantsApiClient, editModel, isLocalTest);
+        catch
+        {
+            await TryRemoveTenantAfterFailureAsync(context, tenantsApiClient, editModel.Name);
+            throw;
+        }
     }
 
     public static async Task TestContentsOrchardCoreApiClientBehaviorAsync(
@@ -464,6 +472,28 @@ public static class TestCaseUITestContextExtensions
             TimeSpan.FromSeconds(30),
             TimeSpan.FromSeconds(5),
             context.Configuration.TestCancellationToken);
+
+    private static async Task TryRemoveTenantAfterFailureAsync(UITestContext context, TenantsApiClient apiClient, string tenantName)
+    {
+        context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("The test failed, trying to remove the tenant.");
+
+        (await apiClient.OrchardCoreApi.DisableAsync(tenantName)).Dispose();
+
+        var isRemoved = await ReliabilityHelper.DoWithRetriesAsync(
+            async () =>
+            {
+                using var response = await apiClient.OrchardCoreApi.RemoveAsync(tenantName);
+                return response.IsSuccessStatusCode || response.StatusCode == HttpStatusCode.NotFound;
+            },
+            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(5));
+
+        if (!isRemoved)
+        {
+            context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug(
+                $"Couldn't remove the tenant \"{tenantName}\" after the test failure.");
+        }
+    }
 
     private static async Task<string> TestContentCreateAsync(
         UITestContext context,
