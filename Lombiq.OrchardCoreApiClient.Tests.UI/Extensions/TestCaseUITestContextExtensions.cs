@@ -470,10 +470,15 @@ public static class TestCaseUITestContextExtensions
             context.SwitchCurrentTenant(createApiModel.Name, uriBuilder.Uri);
         }
 
-        await apiClientBehaviorTestModel.StepsInTenantContext(context, createApiModel, setupApiModel);
+        try
+        {
+            await apiClientBehaviorTestModel.StepsInTenantContext(context, createApiModel, setupApiModel);
+        }
+        finally
+        {
+            context.SwitchCurrentTenantToDefault();
+        }
 
-        // Switch back to the Default tenant.
-        context.SwitchCurrentTenantToDefault();
         context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Additional steps in the tenant context were done.");
     }
 
