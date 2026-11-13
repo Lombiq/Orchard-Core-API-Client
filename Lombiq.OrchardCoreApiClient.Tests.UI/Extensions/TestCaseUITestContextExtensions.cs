@@ -161,36 +161,7 @@ public static class TestCaseUITestContextExtensions
         {
             await TestTenantCreateAsync(context, tenantsApiClient, createApiModel, isLocalTest);
             await TestTenantSetupAsync(context, tenantsApiClient, createApiModel, setupApiModel);
-
-            // If there are additional steps to execute in the tenant context, do that now.
-            if (apiClientBehaviorTestModel.StepsInTenantContext != null)
-            {
-                context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Executing additional steps in the tenant context...");
-
-                // Switch to the tenant context.
-                if (string.IsNullOrEmpty(createApiModel.RequestUrlHost))
-                {
-                    context.SwitchCurrentTenant(createApiModel.Name, createApiModel.RequestUrlPrefix);
-                }
-                else
-                {
-                    var uriBuilder = new UriBuilder
-                    {
-                        Scheme = "https",
-                        Host = createApiModel.RequestUrlHost,
-                        Path = createApiModel.RequestUrlPrefix,
-                    };
-                    context.SwitchCurrentTenant(createApiModel.Name, uriBuilder.Uri);
-                }
-
-                // Execute additional steps in the tenant context.
-                await apiClientBehaviorTestModel.StepsInTenantContext(context, createApiModel, setupApiModel);
-
-                // Switch back to the Default tenant.
-                context.SwitchCurrentTenantToDefault();
-                context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Additional steps in the tenant context were done.");
-            }
-
+            await ExecuteStepsInTenantContextAsync(context, apiClientBehaviorTestModel, createApiModel, setupApiModel);
             await TestTenantEditAsync(context, tenantsApiClient, editModel, setupApiModel, isLocalTest);
             await TestTenantDisableAsync(context, tenantsApiClient, editModel, isLocalTest);
             await TestTenantRemoveAsync(context, tenantsApiClient, editModel, isLocalTest);
@@ -473,6 +444,39 @@ public static class TestCaseUITestContextExtensions
             TimeSpan.FromSeconds(5),
             context.Configuration.TestCancellationToken);
 
+    private static async Task ExecuteStepsInTenantContextAsync(
+        UITestContext context,
+        ApiClientBehaviorTestModel apiClientBehaviorTestModel,
+        TenantApiModel createApiModel,
+        TenantSetupApiModel setupApiModel)
+    {
+        if (apiClientBehaviorTestModel.StepsInTenantContext == null) return;
+
+        context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Executing additional steps in the tenant context...");
+
+        // Switch to the tenant context.
+        if (string.IsNullOrEmpty(createApiModel.RequestUrlHost))
+        {
+            context.SwitchCurrentTenant(createApiModel.Name, createApiModel.RequestUrlPrefix);
+        }
+        else
+        {
+            var uriBuilder = new UriBuilder
+            {
+                Scheme = "https",
+                Host = createApiModel.RequestUrlHost,
+                Path = createApiModel.RequestUrlPrefix,
+            };
+            context.SwitchCurrentTenant(createApiModel.Name, uriBuilder.Uri);
+        }
+
+        await apiClientBehaviorTestModel.StepsInTenantContext(context, createApiModel, setupApiModel);
+
+        // Switch back to the Default tenant.
+        context.SwitchCurrentTenantToDefault();
+        context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("Additional steps in the tenant context were done.");
+    }
+
     private static async Task TryRemoveTenantAfterFailureAsync(UITestContext context, TenantsApiClient apiClient, string tenantName)
     {
         context.Configuration.TestOutputHelper.WriteLineTimestampedAndDebug("The test failed, trying to remove the tenant.");
@@ -486,7 +490,8 @@ public static class TestCaseUITestContextExtensions
                 return response.IsSuccessStatusCode || response.StatusCode == HttpStatusCode.NotFound;
             },
             TimeSpan.FromSeconds(30),
-            TimeSpan.FromSeconds(5));
+            TimeSpan.FromSeconds(5),
+            context.Configuration.TestCancellationToken);
 
         if (!isRemoved)
         {
