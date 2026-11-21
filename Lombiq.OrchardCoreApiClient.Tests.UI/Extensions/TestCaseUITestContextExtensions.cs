@@ -14,6 +14,7 @@ using OrchardCore.Taxonomies.Models;
 using Refit;
 using Shouldly;
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http.Json;
@@ -459,8 +460,12 @@ public static class TestCaseUITestContextExtensions
 
         context.Get(By.Id("TitlePart_Title")).GetValue().ShouldBe(contentItem.DisplayText);
 
-        context.Get(By.Id("AutoroutePart_RouteContainedItems")).GetValue()
-            .ShouldBe(contentItem.GetOrCreate<AutoroutePart>().RouteContainedItems.ToString().ToLowerFirstLetter());
+        var routeContainedItemsValue = context.Get(By.Id("AutoroutePart_RouteContainedItems")).GetValue();
+        routeContainedItemsValue.ShouldBe(contentItem
+            .GetOrCreate<AutoroutePart>()
+            .RouteContainedItems
+            .ToString()
+            .ToLowerFirstLetter(CultureInfo.InvariantCulture));
 
         context.Get(By.CssSelector("#TaxonomyPart_TermContentType option[selected]")).Text
             .ShouldBe(contentItem.GetOrCreate<TaxonomyPart>().TermContentType);
